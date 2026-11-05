@@ -1,0 +1,285 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Montserrat Variable', 'Segoe UI', system-ui, sans-serif;
+  --color-gold: #ffcc33;
+  --color-hot: #ff3d7f;
+  --color-sky: #2ec4ff;
+  --color-stage: #0b0620;
+  --color-stage-2: #1b1040;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #0f1117;
+  color: #e7e9ee;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* ── Lielā ekrāna fons ───────────────────────────────────── */
+
+.stage-bg {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(255, 61, 127, 0.35), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(46, 196, 255, 0.25), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 0% 100%, rgba(180, 124, 255, 0.25), transparent 60%),
+    linear-gradient(180deg, #120a33 0%, #0b0620 100%);
+}
+
+.stage-rays {
+  position: absolute;
+  inset: -50%;
+  background: repeating-conic-gradient(from 0deg, rgba(255, 255, 255, 0.035) 0deg 8deg, transparent 8deg 20deg);
+  animation: spin 120s linear infinite;
+  pointer-events: none;
+}
+
+.glass {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04));
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(6px);
+}
+
+.text-glow {
+  text-shadow:
+    0 0 24px rgba(255, 204, 51, 0.55),
+    0 4px 0 rgba(0, 0, 0, 0.35);
+}
+
+.gold-text {
+  background: linear-gradient(180deg, #fff3c4 0%, #ffcc33 45%, #e09a00 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ── Animācijas ──────────────────────────────────────────── */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes flip-in {
+  0% {
+    opacity: 0;
+    transform: perspective(1200px) rotateX(-90deg);
+  }
+  60% {
+    opacity: 1;
+    transform: perspective(1200px) rotateX(12deg);
+  }
+  100% {
+    transform: perspective(1200px) rotateX(0);
+  }
+}
+@keyframes float-up {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 20px) scale(0.6);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1.15);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -70px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -110px) scale(0.9);
+  }
+}
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-14px);
+  }
+  40%,
+  80% {
+    transform: translateX(14px);
+  }
+}
+@keyframes pulse-ring {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+@keyframes glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--glow, rgba(255, 204, 51, 0.6));
+  }
+  50% {
+    box-shadow: 0 0 60px 10px var(--glow, rgba(255, 204, 51, 0.6));
+  }
+}
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+@keyframes eq {
+  0%,
+  100% {
+    transform: scaleY(0.25);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+@keyframes drum {
+  0%,
+  100% {
+    transform: scale(1) rotate(0);
+  }
+  25% {
+    transform: scale(1.04) rotate(-1deg);
+  }
+  75% {
+    transform: scale(1.04) rotate(1deg);
+  }
+}
+
+.anim-pop {
+  animation: pop-in 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+.anim-slide {
+  animation: slide-up 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.anim-fade {
+  animation: fade-in 0.5s ease both;
+}
+.anim-flip {
+  animation: flip-in 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.anim-shake {
+  animation: shake 0.5s ease both;
+}
+.anim-pulse {
+  animation: pulse-ring 0.5s ease-in-out infinite;
+}
+.anim-glow {
+  animation: glow 1.6s ease-in-out infinite;
+}
+.anim-drum {
+  animation: drum 0.35s ease-in-out infinite;
+}
+.anim-float {
+  animation: float-up 2s ease-out both;
+}
+.shimmer {
+  background-image: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: shimmer 2.5s linear infinite;
+}
+
+.delay-1 {
+  animation-delay: 0.1s;
+}
+.delay-2 {
+  animation-delay: 0.2s;
+}
+.delay-3 {
+  animation-delay: 0.3s;
+}
+.delay-4 {
+  animation-delay: 0.4s;
+}
+.delay-5 {
+  animation-delay: 0.5s;
+}
+
+/* ── Pults ───────────────────────────────────────────────── */
+
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition select-none;
+  @apply bg-white/10 text-white hover:bg-white/20 active:scale-[0.97] disabled:opacity-35 disabled:hover:bg-white/10 disabled:active:scale-100;
+}
+.btn-primary {
+  @apply bg-indigo-500 hover:bg-indigo-400 disabled:hover:bg-indigo-500;
+}
+.btn-good {
+  @apply bg-emerald-600 hover:bg-emerald-500 disabled:hover:bg-emerald-600;
+}
+.btn-bad {
+  @apply bg-rose-600 hover:bg-rose-500 disabled:hover:bg-rose-600;
+}
+.btn-warn {
+  @apply bg-amber-500 text-black hover:bg-amber-400 disabled:hover:bg-amber-500;
+}
+.btn-lg {
+  @apply px-4 py-3 text-base;
+}
+.btn-sm {
+  @apply px-2 py-1 text-xs;
+}
+.card {
+  @apply rounded-xl border border-white/10 bg-[#171a23] p-4;
+}
+.input {
+  @apply w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-indigo-400;
+}
+.label {
+  @apply mb-1 block text-xs font-semibold tracking-wide text-white/50 uppercase;
+}
+kbd {
+  @apply rounded border border-white/20 bg-white/10 px-1.5 py-0.5 font-mono text-[10px] text-white/70;
+}
