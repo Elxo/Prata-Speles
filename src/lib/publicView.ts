@@ -9,7 +9,9 @@ import type {
   LiveEvent,
   MatchKind,
   MatchStatus,
+  MediaCmd,
   Pair,
+  PowerUpKind,
   QuestionType,
   RuleSlide,
   ScreenMode,
@@ -103,7 +105,9 @@ export interface PublicView {
   final: PublicFinal | null;
   champion: PublicTeam | null;
   event: LiveEvent | null;
-  media: { cmd: 'play' | 'pause' | 'stop'; n: number };
+  media: { cmd: MediaCmd; n: number };
+  /** Pašreizējam jautājumam nopirktās papildiespējas (katrai komandai). */
+  powerUps: Pair<PowerUpKind[]>;
   sound: boolean;
 }
 
@@ -203,6 +207,9 @@ export function toPublicView(s: AppState): PublicView {
     champion: pubTeam(t.championId),
     event: live.event,
     media: live.media,
+    powerUps: ([0, 1] as Side[]).map((side) =>
+      m && q && !live.golden.active ? (m.powerUps ?? []).filter((u) => u.side === side && u.questionId === q.id).map((u) => u.kind) : [],
+    ) as Pair<PowerUpKind[]>,
     sound: live.sound,
   };
 }

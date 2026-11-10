@@ -16,11 +16,11 @@ import { ScreenContent } from '../screen/ScreenApp';
 
 /** Izdomāti rezultāti: [uzvarētājs, zaudētājs, uzvarētāja punkti, zaudētāja punkti]. */
 const RESULTS: Record<string, [number, number, number, number]> = {
-  r1m1: [0, 1, 90, 60],
-  r1m2: [3, 2, 80, 70],
-  r1m3: [4, 5, 100, 50],
-  sf1: [4, 2, 80, 60],
-  sf2: [3, 0, 90, 70],
+  r1m1: [0, 1, 900, 600],
+  r1m2: [3, 2, 800, 700],
+  r1m3: [4, 5, 1000, 500],
+  sf1: [4, 2, 800, 600],
+  sf2: [3, 0, 900, 700],
 };
 
 /** Demo turnīrs, kurā pirmā kārta un pusfināli jau izspēlēti. */
@@ -73,7 +73,7 @@ const STEPS: Step[] = [
       // Kopīgais pulkstenis: izliekamies, ka pirmā tēma aizņēmusi 7 minūtes.
       timerPause(d);
       d.live.timer.elapsedMs = 7 * 60 * 1000;
-      jury(d, 24, 18);
+      jury(d, 240, 180);
     },
   },
   {

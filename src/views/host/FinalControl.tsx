@@ -4,6 +4,7 @@ import {
   adjustScore,
   awardWin,
   endMatch,
+  mediaCommand,
   nextGolden,
   nextQuestion,
   prevQuestion,
@@ -14,6 +15,7 @@ import {
   swapDebateSides,
 } from '../../lib/engine';
 import { currentQuestion, matchQuestions } from '../../lib/tournament';
+import { SCORE_STEP } from '../../lib/defaults';
 import { matchTeams, TimerControl } from './shared';
 import { DuelControl } from './DuelControl';
 
@@ -75,6 +77,31 @@ export function FinalControl({ s, m }: { s: AppState; m: Match }) {
             </span>
           </div>
           <div className="text-2xl leading-snug font-black">„{q.text}”</div>
+          {q.type === 'video' &&
+            (q.media ? (
+              <div className="space-y-2 rounded-lg bg-black/20 p-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-bold">🎬 Video tēze</span>
+                  <button className="btn btn-good" disabled={!s.live.shown} onClick={() => act((d) => mediaCommand(d, 'play'))}>
+                    ▶ Atskaņot
+                  </button>
+                  <button className="btn" disabled={!s.live.shown} onClick={() => act((d) => mediaCommand(d, 'pause'))}>
+                    ⏸ Pauze
+                  </button>
+                  <button className="btn" disabled={!s.live.shown} onClick={() => act((d) => mediaCommand(d, 'stop'))}>
+                    ⏹ No sākuma
+                  </button>
+                  <button className="btn btn-primary" disabled={!s.live.shown} onClick={() => act((d) => mediaCommand(d, 'text'))}>
+                    📝 Rādīt tēzes tekstu
+                  </button>
+                </div>
+                <p className="text-xs text-white/50">
+                  Pēc „Rādīt tēzi” ekrānā parādās video. Kad tas beidzas, automātiski parādās tēzes teksts (vai spiediet „Rādīt tēzes tekstu”).
+                </p>
+              </div>
+            ) : (
+              <span className="text-sm text-amber-400">⚠ Video tēzei nav pievienots faila URL — ekrānā būs tikai teksts.</span>
+            ))}
           {q.hostNotes && (
             <div className="rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-2 text-sm text-amber-100">📝 {q.hostNotes}</div>
           )}
@@ -160,11 +187,11 @@ export function FinalControl({ s, m }: { s: AppState; m: Match }) {
                   />
                 </div>
                 <div className="flex justify-end gap-1">
-                  <button className="btn btn-sm" onClick={() => act((d) => adjustScore(d, team.id, -10), `−10 ${team.name}`)}>
-                    −10
+                  <button className="btn btn-sm" onClick={() => act((d) => adjustScore(d, team.id, -SCORE_STEP), `−${SCORE_STEP} ${team.name}`)}>
+                    −{SCORE_STEP}
                   </button>
-                  <button className="btn btn-sm" onClick={() => act((d) => adjustScore(d, team.id, 10), `+10 ${team.name}`)}>
-                    +10
+                  <button className="btn btn-sm" onClick={() => act((d) => adjustScore(d, team.id, SCORE_STEP), `+${SCORE_STEP} ${team.name}`)}>
+                    +{SCORE_STEP}
                   </button>
                 </div>
               </div>

@@ -3,9 +3,15 @@ import {
   act,
   adjustScore,
   awardWin,
+  buyPowerUp,
   decidingScores,
   endMatch,
   gotoQuestion,
+  hasPowerUp,
+  isLeader,
+  powerUpBlock,
+  powerUpPrice,
+  powerUpsBought,
   mark,
   nextGolden,
   nextQuestion,
@@ -13,6 +19,8 @@ import {
   setActiveSide,
 } from '../../lib/engine';
 import { currentQuestion, matchQuestions } from '../../lib/tournament';
+import { SCORE_STEP } from '../../lib/defaults';
+import { POWER_UP_LIST } from '../../lib/powerUps';
 import { matchTeams, QuestionCard, ShowRevealButtons, TimerControl } from './shared';
 
 export function DuelControl({ s, m }: { s: AppState; m: Match }) {
@@ -104,7 +112,12 @@ export function DuelControl({ s, m }: { s: AppState; m: Match }) {
                 <div className="text-lg font-black" style={{ color: team.color }}>
                   {team.name}
                 </div>
-                {active && <span className="rounded bg-amber-400 px-2 py-0.5 text-xs font-black text-black">ATBILD</span>}
+                <div className="flex gap-1">
+                  {q && !golden && hasPowerUp(m, side, q.id, 'double') && (
+                    <span className="rounded bg-fuchsia-500 px-2 py-0.5 text-xs font-black">✖2 PUNKTI</span>
+                  )}
+                  {active && <span className="rounded bg-amber-400 px-2 py-0.5 text-xs font-black text-black">ATBILD</span>}
+                </div>
               </div>
               <div className="flex items-end gap-4">
                 <div>
@@ -116,11 +129,11 @@ export function DuelControl({ s, m }: { s: AppState; m: Match }) {
                   <div className="text-3xl font-black text-white/70">{team.score}</div>
                 </div>
                 <div className="ml-auto flex gap-1">
-                  <button className="btn btn-sm" onClick={() => act((d) => adjustScore(d, team.id, -10), `−10 ${team.name}`)}>
-                    −10
+                  <button className="btn btn-sm" onClick={() => act((d) => adjustScore(d, team.id, -SCORE_STEP), `−${SCORE_STEP} ${team.name}`)}>
+                    −{SCORE_STEP}
                   </button>
-                  <button className="btn btn-sm" onClick={() => act((d) => adjustScore(d, team.id, 10), `+10 ${team.name}`)}>
-                    +10
+                  <button className="btn btn-sm" onClick={() => act((d) => adjustScore(d, team.id, SCORE_STEP), `+${SCORE_STEP} ${team.name}`)}>
+                    +{SCORE_STEP}
                   </button>
                 </div>
               </div>
@@ -156,6 +169,7 @@ export function DuelControl({ s, m }: { s: AppState; m: Match }) {
                   </button>
                 )}
               </div>
+              {!golden && <PowerUpRow s={s} side={side} teamName={team.name} />}
             </div>
           );
         })}
@@ -168,6 +182,53 @@ export function DuelControl({ s, m }: { s: AppState; m: Match }) {
         <button className="btn btn-bad btn-lg" onClick={finish}>
           🏁 Beigt spēli
         </button>
+      </div>
+    </div>
+  );
+}
+
+/** Papildiespēju pirkšana: cena tiek atņemta no komandas kopējiem punktiem. */
+function PowerUpRow({ s, side, teamName }: { s: AppState; side: Side; teamName: string }) {
+  const cfg = s.tournament.settings.powerUps;
+  const list = POWER_UP_LIST.filter(([kind]) => cfg?.[kind]?.enabled);
+  if (!list.length) return null;
+  const m = s.tournament.matches.find((x) => x.id === s.live.matchId);
+  const q = currentQuestion(s);
+  const limit = s.tournament.settings.powerUpsPerGame;
+  const leader = isLeader(s, side);
+  return (
+    <div className="space-y-1 border-t border-white/10 pt-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="label">Papildiespējas (no kopējiem punktiem)</span>
+        <span className="text-xs text-white/50">
+          {powerUpsBought(s, side)}
+          {limit > 0 ? `/${limit}` : ''} šajā spēlē
+        </span>
+        {leader && s.tournament.settings.leaderPriceMultiplier > 1 && (
+          <span className="rounded bg-amber-500/30 px-1.5 text-xs font-bold text-amber-200">
+            vada → cenas ×{s.tournament.settings.leaderPriceMultiplier}
+          </span>
+        )}
+      </div>
+      <div className="grid grid-cols-2 gap-1">
+        {list.map(([kind, def]) => {
+          const used = !!(m && q && hasPowerUp(m, side, q.id, kind));
+          const block = powerUpBlock(s, side, kind);
+          return (
+            <button
+              key={kind}
+              className={`btn btn-sm justify-between ${used ? 'bg-fuchsia-600/60 ring-2 ring-fuchsia-300' : ''}`}
+              disabled={!!block}
+              title={used ? 'Izmantota šim jautājumam' : (block ?? def.hint)}
+              onClick={() => act((d) => buyPowerUp(d, side, kind), `${def.label} — ${teamName}`)}
+            >
+              <span>
+                {def.icon} {def.label}
+              </span>
+              <span className="text-white/60">{used ? '✔' : `−${powerUpPrice(s, side, kind)}`}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

@@ -1,7 +1,10 @@
+import { useEffect, useRef, useState } from 'react';
 import type { PublicMatch, PublicTeam, PublicView } from '../../lib/publicView';
 import type { Side } from '../../types';
 import { QUESTION_TYPES } from '../../questionTypes';
 import { pointsWord } from '../../lib/util';
+import { POWER_UPS } from '../../lib/powerUps';
+import { IS_PREVIEW } from '../../lib/env';
 import { TeamPanel, TimerRing } from './parts';
 
 export function QuestionScreen({ view }: { view: PublicView }) {
@@ -58,9 +61,66 @@ export function QuestionScreen({ view }: { view: PublicView }) {
             active={view.activeSide === side && view.shown && !view.revealed}
             event={view.event}
             showMatchPoints={m.kind !== 'final'}
-            extra={golden && view.goldenTries[side] ? <span className="text-xl text-white/50">atbildēja</span> : null}
+            extra={
+              golden ? (
+                view.goldenTries[side] ? <span className="text-xl text-white/50">atbildēja</span> : null
+              ) : (
+                <PowerUpBadges kinds={view.powerUps[side]} />
+              )
+            }
           />
         ))}
+      </div>
+
+      <PowerUpBanner view={view} teams={teams} />
+    </div>
+  );
+}
+
+function PowerUpBadges({ kinds }: { kinds: PublicView['powerUps'][number] }) {
+  if (!kinds.length) return null;
+  return (
+    <>
+      {kinds.map((k) => (
+        <span key={k} className="anim-pop rounded-full bg-fuchsia-500 px-3 py-0.5 text-xl font-black text-white" title={POWER_UPS[k].label}>
+          {POWER_UPS[k].icon}
+          {k === 'double' ? ' PUNKTI' : ''}
+        </span>
+      ))}
+    </>
+  );
+}
+
+/** Liels paziņojums ekrāna vidū, kad komanda nopērk papildiespēju. */
+function PowerUpBanner({ view, teams }: { view: PublicView; teams: [PublicTeam, PublicTeam] }) {
+  const [shown, setShown] = useState<{ n: number; kind: NonNullable<PublicView['event']>['powerUp']; side: Side } | null>(null);
+  const seen = useRef(view.event?.n ?? 0);
+  const hideTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => {
+    const e = view.event;
+    if (!e || e.n <= seen.current) return;
+    seen.current = e.n;
+    if (e.kind !== 'powerup' || !e.powerUp || e.side == null) return;
+    const item = { n: e.n, kind: e.powerUp, side: e.side };
+    setShown(item);
+    clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => setShown((cur) => (cur === item ? null : cur)), 2600);
+  }, [view.event]);
+  useEffect(() => () => clearTimeout(hideTimer.current), []);
+  if (!shown?.kind) return null;
+  const def = POWER_UPS[shown.kind];
+  const team = teams[shown.side];
+  return (
+    <div key={shown.n} className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/40">
+      <div
+        className="anim-pop flex flex-col items-center gap-4 rounded-[48px] border-8 bg-[#1b1040]/95 px-24 py-14 text-center"
+        style={{ borderColor: team.color, boxShadow: `0 0 120px ${team.color}aa` }}
+      >
+        <div className="text-[140px] leading-none font-black">{def.icon}</div>
+        <div className="gold-text text-[96px] leading-none font-black">{def.screen}</div>
+        <div className="text-5xl font-black" style={{ color: team.color }}>
+          {team.name}
+        </div>
       </div>
     </div>
   );
@@ -165,16 +225,10 @@ function DebateScreen({ view, m, teams }: { view: PublicView; m: PublicMatch; te
               <div className="gold-text text-[160px] leading-none font-black">{q.number}. tēma</div>
               {q.topic && <span className="glass rounded-3xl px-8 py-4 text-5xl font-extrabold">{q.topic}</span>}
             </div>
+          ) : q.type === 'video' && q.media ? (
+            <ThesisVideo key={q.id} view={view} />
           ) : (
-            <div key={q.id} className="flex w-full flex-col items-center gap-4">
-              <div className="text-3xl font-bold tracking-[0.3em] text-white/60 uppercase">Tēze</div>
-              <div
-                className={`anim-flip text-center leading-tight font-black text-balance ${(q.text?.length ?? 0) > 70 ? 'text-[64px]' : 'text-[80px]'}`}
-                style={{ textShadow: '0 6px 30px rgba(0,0,0,0.5)' }}
-              >
-                „{q.text}”
-              </div>
-            </div>
+            <ThesisText key={q.id} text={q.text} />
           )}
           {q && (
             <div className="grid w-full grid-cols-2 gap-16 px-10">
@@ -211,6 +265,68 @@ function DebateScreen({ view, m, teams }: { view: PublicView; m: PublicMatch; te
         ))}
       </div>
     </div>
+  );
+}
+
+function ThesisText({ text }: { text?: string }) {
+  return (
+    <div className="flex w-full flex-col items-center gap-4">
+      <div className="text-3xl font-bold tracking-[0.3em] text-white/60 uppercase">Tēze</div>
+      <div
+        className={`anim-flip text-center leading-tight font-black text-balance ${(text?.length ?? 0) > 70 ? 'text-[64px]' : 'text-[80px]'}`}
+        style={{ textShadow: '0 6px 30px rgba(0,0,0,0.5)' }}
+      >
+        „{text}”
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Video tēze: vispirms video (vadītājs to palaiž no pults), pēc tā beigām —
+ * tēzes teksts, lai komandas to redz visu debašu laiku.
+ */
+function ThesisVideo({ view }: { view: PublicView }) {
+  const q = view.question!;
+  const ref = useRef<HTMLVideoElement>(null);
+  const [phase, setPhase] = useState<'video' | 'text'>('video');
+  const last = useRef(view.media.n);
+  useEffect(() => {
+    if (view.media.n <= last.current) return;
+    last.current = view.media.n;
+    const el = ref.current;
+    const cmd = view.media.cmd;
+    if (cmd === 'text') {
+      el?.pause();
+      setPhase('text');
+      return;
+    }
+    setPhase('video');
+    if (!el) return;
+    if (cmd === 'play') void el.play().catch(() => {});
+    if (cmd === 'pause') el.pause();
+    if (cmd === 'stop') {
+      el.pause();
+      el.currentTime = 0;
+    }
+  }, [view.media]);
+
+  return (
+    <>
+      {/* Video elements paliek DOM, lai „No sākuma” / „Atskaņot” strādā arī pēc teksta parādīšanas. */}
+      <div className={`flex w-full flex-col items-center gap-3 ${phase === 'video' ? '' : 'hidden'}`}>
+        <div className="text-3xl font-bold tracking-[0.3em] text-white/60 uppercase">Tēze</div>
+        <video
+          ref={ref}
+          src={q.media}
+          muted={IS_PREVIEW || !view.sound}
+          preload="auto"
+          onEnded={() => setPhase('text')}
+          className="anim-pop h-[400px] max-w-[1300px] rounded-3xl border-4 border-white/20 bg-black shadow-2xl"
+        />
+      </div>
+      {phase === 'text' && <ThesisText text={q.text} />}
+    </>
   );
 }
 

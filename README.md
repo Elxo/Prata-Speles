@@ -77,6 +77,19 @@ Pultī labajā pusē vienmēr redzams lielā ekrāna **priekšskatījums**.
 - **„🏁 Beigt spēli”** — uzvar komanda ar vairāk punktiem **šajā spēlē**. Ja rezultāts ir neizšķirts, automātiski sākas **zelta jautājums**: atzīmējiet pirmo pareizo atbildi un vēlreiz nospiediet „Beigt spēli”.
 - Punktus var koriģēt ar `−10` / `+10` (komandas kartītē) vai ar jebkuru soli punktu tabulā (cilne „Turnīrs”).
 
+### Papildiespējas (dueļos)
+
+Katra komanda sāk turnīru ar **100 punktiem** (jautājums parasti dod 100 punktus). Dueļa laikā komanda var nopirkt papildiespējas par saviem **kopējiem** punktiem. Pults komandas kartītē ir pogas ar cenām. Dueļa punkti nemainās, tāpēc pirkums ietekmē kopvērtējumu un finālu, nevis šī dueļa uzvarētāju.
+
+| Papildiespēja | Kad | Ko dara |
+| --- | --- | --- |
+| 🙋 Zāles palīdzība | kamēr jautājums ekrānā | Komanda drīkst pajautāt zālei. |
+| ✖2 Dubultie punkti | **pirms** „Rādīt jautājumu” | Pareiza atbilde dod divreiz vairāk punktu. |
+| ⏱ Papildu laiks | kamēr jautājums ekrānā | Pieliek taimerim sekundes (noklusējums 15 s). |
+| ↪ Nodot pretiniekam | kamēr jautājums ekrānā, tikai atbildētāja komanda | Atbild otra komanda, taimeris sākas no jauna. |
+
+Katru papildiespēju vienam jautājumam komanda var izmantot vienu reizi. Vienā spēlē komanda var nopirkt **ne vairāk kā 3** papildiespējas. Komanda, kas pret savu pretinieku **vada pēc kopējiem punktiem, maksā divreiz vairāk**. Ekrānā parādās paziņojums. Kļūdainu pirkumu var atsaukt ar `Z`. Cenas, sākuma punktus un ieslēgšanu maina redaktorā (**Turnīrs un spēles**).
+
 ### Kas iet tālāk (6 komandu shēma, 6 spēles)
 
 - Pēc pirmās kārtas tālāk iet **3 uzvarētāji un labākais zaudētājs** (pēc kopējiem punktiem).
@@ -89,6 +102,8 @@ Pultī labajā pusē vienmēr redzams lielā ekrāna **priekšskatījums**.
 Starp spēlēm ekrānā var parādīt **turnīra koku** (`B`), **punktu tabulu** (`T`) vai **logo** (`L`).
 
 ### Fināls
+
+> **Video tēze.** Ja tēzes jautājuma tips ir „Video”, pēc „Rādīt tēzi” ekrānā parādās video (pultī: Atskaņot / Pauze / No sākuma). Kad video beidzas, ekrānā automātiski parādās tēzes teksts. To var parādīt arī uzreiz ar „📝 Rādīt tēzes tekstu”. Tēzes tekstu ierakstiet jautājuma laukā.
 
 Sākot finālu, ekrānā vispirms automātiski parādās **fināla noteikumi** (`→`, līdz sākas spēle). Katram jautājumam:
 

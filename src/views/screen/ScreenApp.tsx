@@ -26,6 +26,7 @@ const EVENT_SOUND: Partial<Record<EventKind, SoundName>> = {
   jury: 'bets',
   show: 'show',
   golden: 'golden',
+  powerup: 'reveal',
 };
 
 /** Atskaņo skaņu katram jaunam notikumam (bet ne tiem, kas notika pirms ekrāna atvēršanas). */

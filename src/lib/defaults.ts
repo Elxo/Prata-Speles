@@ -3,11 +3,27 @@ import { uid } from './util';
 
 export const DEFAULT_SETTINGS: Settings = {
   defaultTimerSec: 30,
+  questionsPerGame: 16,
   finalQuestionCount: 3,
   finalTimerSec: 20 * 60,
   imageRevealSteps: 4,
-  debateMaxPoints: 30,
+  debateMaxPoints: 300,
+  startingScore: 100,
+  powerUps: {
+    audience: { enabled: true, price: 100 },
+    double: { enabled: true, price: 50 },
+    time: { enabled: true, price: 30 },
+    pass: { enabled: true, price: 50 },
+  },
+  extraTimeSec: 15,
+  leaderPriceMultiplier: 2,
+  powerUpsPerGame: 3,
 };
+
+/** Noklusējuma jautājuma vērtība. */
+export const DEFAULT_QUESTION_POINTS = 100;
+/** Solis manuālajai punktu korekcijai pultī. */
+export const SCORE_STEP = 100;
 
 export const TEAM_COLORS = ['#ff3d7f', '#2ec4ff', '#ffcc33', '#4ade80', '#b47cff', '#ff8a3d', '#f43f5e', '#14b8a6'];
 
@@ -55,7 +71,7 @@ export function defaultRules(): RuleSlide[] {
     ),
     r(
       'Kā tiek piešķirti punkti',
-      'Par katru pareizu atbildi komanda saņem 10 punktus, par nepareizu — 0.\nDueli uzvar komanda, kas šajā spēlē ieguvusi vairāk punktu.',
+      'Katra komanda sāk ar 100 punktiem.\nPar katru pareizu atbildi komanda saņem 100 punktus, par nepareizu — 0.\nDueli uzvar komanda, kas šajā spēlē ieguvusi vairāk punktu.',
     ),
     r(
       'Laiks',
@@ -64,6 +80,10 @@ export function defaultRules(): RuleSlide[] {
     r(
       'Punkti saglabājas!',
       'Katras komandas KOPĒJIE punkti pāriet no kārtas uz kārtu un netiek atiestatīti.\nKatrs punkts ir svarīgs — arī finālā.',
+    ),
+    r(
+      'Papildiespējas',
+      'Dueļos komandas var nopirkt papildiespējas par saviem kopējiem punktiem:\n🙋 Zāles palīdzība · ✖2 Dubultie punkti (jāpiesaka pirms jautājuma) · ⏱ Papildu laiks · ↪ Nodot jautājumu pretiniekam.\nKatru papildiespēju vienam jautājumam var izmantot vienu reizi, un spēlē komanda var nopirkt ne vairāk kā 3.\nKomanda, kas vada pēc kopējiem punktiem, maksā divreiz vairāk.',
     ),
     r(
       'Neizšķirts',
@@ -76,7 +96,7 @@ export function defaultRules(): RuleSlide[] {
     ),
     r(
       'Fināls: vērtēšana',
-      'Pēc katras tēmas žūrija piešķir katrai komandai līdz 30 punktiem.\nVērtē argumentus, pārliecināšanas spēju un atbildes pretiniekiem.\nŽūrijas punkti tiek pieskaitīti kopējiem punktiem — uzvar komanda ar visvairāk kopējo punktu.',
+      'Pēc katras tēmas žūrija piešķir katrai komandai līdz 300 punktiem.\nVērtē argumentus, pārliecināšanas spēju un atbildes pretiniekiem.\nŽūrijas punkti tiek pieskaitīti kopējiem punktiem — uzvar komanda ar visvairāk kopējo punktu.',
       { final: true },
     ),
   ];

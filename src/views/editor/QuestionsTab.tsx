@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { AppState, Question, QuestionType } from '../../types';
 import { commit } from '../../lib/store';
+import { DEFAULT_QUESTION_POINTS } from '../../lib/defaults';
 import { OPTION_LETTERS, readFileAsDataURL, uid } from '../../lib/util';
 import { QUESTION_TYPES, QUESTION_TYPE_LIST } from '../../questionTypes';
 
@@ -19,7 +20,7 @@ function editQuestion(setId: string, qid: string, patch: Partial<Question>) {
 }
 
 export function newQuestion(type: QuestionType = 'text'): Question {
-  return { id: uid('q'), type, text: '', answer: '', points: 10 };
+  return { id: uid('q'), type, text: '', answer: '', points: DEFAULT_QUESTION_POINTS };
 }
 
 export function QuestionsTab({ s }: { s: AppState }) {

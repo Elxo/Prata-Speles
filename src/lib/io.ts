@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────────────────────
 import { produce } from 'immer';
 import type { AppState, Question, QuestionType, Tournament } from '../types';
-import { createFinalLive, createLive, DEFAULT_SETTINGS } from './defaults';
+import { createFinalLive, createLive, DEFAULT_QUESTION_POINTS, DEFAULT_SETTINGS } from './defaults';
 import { normalize, uid } from './util';
 
 const FORMAT = 'prata-speles';
@@ -46,6 +46,36 @@ export function migrateState(s: AppState): AppState {
         m.timerSec = DEFAULT_SETTINGS.finalTimerSec;
       }
     }
+    st.questionsPerGame ??= DEFAULT_SETTINGS.questionsPerGame;
+    // Punkti ×10, sākuma punkti un papildiespējas.
+    if (st.startingScore == null) {
+      const t = d.tournament;
+      st.startingScore = DEFAULT_SETTINGS.startingScore;
+      st.debateMaxPoints = (st.debateMaxPoints ?? 30) * 10;
+      for (const set of t.questionSets) for (const q of set.questions) q.points *= 10;
+      const started = t.matches.some((m) => m.status !== 'pending');
+      if (started) {
+        // Turnīrs jau notiek — tikai pārrēķina esošos punktus.
+        for (const team of t.teams) team.score *= 10;
+        for (const m of t.matches) {
+          m.points = [m.points[0] * 10, m.points[1] * 10];
+          for (const r of Object.values(m.finalLog)) r.jury = [r.jury[0] * 10, r.jury[1] * 10];
+          if (m.result) for (const id in m.result.totalsAfter) m.result.totalsAfter[id] *= 10;
+        }
+      } else {
+        for (const team of t.teams) team.score = st.startingScore;
+      }
+      for (const r of t.rules) {
+        r.body = r.body
+          .replace('Par katru pareizu atbildi komanda saņem 10 punktus', 'Katra komanda sāk ar 100 punktiem.\nPar katru pareizu atbildi komanda saņem 100 punktus')
+          .replace('līdz 30 punktiem', 'līdz 300 punktiem');
+      }
+    }
+    st.powerUps ??= structuredClone(DEFAULT_SETTINGS.powerUps);
+    st.extraTimeSec ??= DEFAULT_SETTINGS.extraTimeSec;
+    st.leaderPriceMultiplier ??= DEFAULT_SETTINGS.leaderPriceMultiplier;
+    st.powerUpsPerGame ??= DEFAULT_SETTINGS.powerUpsPerGame;
+    for (const m of d.tournament.matches) m.powerUps ??= [];
     if (!('forSide' in d.live.final)) d.live.final = createFinalLive();
   });
 }
@@ -154,7 +184,7 @@ export interface ImportResult {
   warnings: string[];
 }
 
-export function rowsToQuestions(rows: string[][], defaultPoints = 10): ImportResult {
+export function rowsToQuestions(rows: string[][], defaultPoints = DEFAULT_QUESTION_POINTS): ImportResult {
   const warnings: string[] = [];
   if (rows.length < 2) return { rows: [], warnings: ['Failā nav datu rindu (pirmajai rindai jābūt kolonnu nosaukumiem).'] };
   const header = rows[0].map((h) => normalize(h));

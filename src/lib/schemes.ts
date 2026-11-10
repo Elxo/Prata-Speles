@@ -41,6 +41,7 @@ export function makeMatch(spec: MatchSpec, settings: Settings): Match {
     marks: {},
     finalLog: {},
     goldenUsed: [],
+    powerUps: [],
   };
 }
 

@@ -109,7 +109,7 @@ export function ImportExportTab({ s }: { s: AppState }) {
           color: TEAM_COLORS[i],
           captain: '',
           members: [],
-          score: 0,
+          score: settings.startingScore,
         })),
         matches: getScheme('six')!.build(settings),
         questionSets: [],

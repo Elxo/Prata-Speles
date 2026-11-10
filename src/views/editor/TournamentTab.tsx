@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import type { AppState, Match, RankPool, Settings, Slot } from '../../types';
 import { commit } from '../../lib/store';
+import { POWER_UP_LIST } from '../../lib/powerUps';
 import { SCHEMES, getScheme, makeMatch } from '../../lib/schemes';
 import { resetProgress } from '../../lib/engine';
 import { slotLabel } from '../../lib/tournament';
 import { readFileAsDataURL, uid } from '../../lib/util';
+import { DrawQuestionsButton } from '../../components/DrawQuestionsButton';
 
 const SLOT_KINDS: { kind: Slot['kind']; label: string }[] = [
   { kind: 'seed', label: 'Izloze / manuāli' },
@@ -95,6 +97,7 @@ export function TournamentTab({ s }: { s: AppState }) {
 
       <div className="card grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <NumberField label="Taimeris dueļos (s)" value={t.settings.defaultTimerSec} onChange={(v) => setSetting('defaultTimerSec', v)} />
+        <NumberField label="Jautājumi katrā duelī (izlozē)" value={t.settings.questionsPerGame} onChange={(v) => setSetting('questionsPerGame', v)} />
         <NumberField label="Attēla atklāšanas soļi" value={t.settings.imageRevealSteps} onChange={(v) => setSetting('imageRevealSteps', v)} />
         <NumberField label="Fināla debašu tēmu skaits" value={t.settings.finalQuestionCount} onChange={(v) => setSetting('finalQuestionCount', v)} />
         <NumberField
@@ -103,6 +106,47 @@ export function TournamentTab({ s }: { s: AppState }) {
           onChange={(v) => setSetting('finalTimerSec', v * 60)}
         />
         <NumberField label="Žūrijas maks. punkti par tēmu" value={t.settings.debateMaxPoints} onChange={(v) => setSetting('debateMaxPoints', v)} />
+        <NumberField label="Sākuma punkti komandai" value={t.settings.startingScore} onChange={(v) => setSetting('startingScore', v)} />
+        <div className="col-span-full space-y-2 rounded-lg bg-black/20 p-3">
+          <div className="flex flex-wrap items-baseline gap-2">
+            <h3 className="font-bold">Papildiespējas (dueļos)</h3>
+            <span className="text-xs text-white/50">Komandas tās pērk par saviem kopējiem punktiem. Katru var izmantot vienu reizi katram jautājumam.</span>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            <NumberField label="Maks. pirkumi komandai spēlē (0 = bez limita)" value={t.settings.powerUpsPerGame} onChange={(v) => setSetting('powerUpsPerGame', v)} />
+            <NumberField
+              label="Cenu reizinātājs vadošajai komandai"
+              value={t.settings.leaderPriceMultiplier}
+              onChange={(v) => setSetting('leaderPriceMultiplier', Math.max(1, v))}
+            />
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            {POWER_UP_LIST.map(([kind, def]) => {
+              const cfg = t.settings.powerUps[kind];
+              const setCfg = (patch: Partial<typeof cfg>) => commit((d) => void Object.assign(d.tournament.settings.powerUps[kind], patch));
+              return (
+                <div key={kind} className={`space-y-2 rounded-lg border border-white/10 p-3 ${cfg.enabled ? '' : 'opacity-50'}`}>
+                  <label className="flex items-center gap-2 font-bold">
+                    <input type="checkbox" checked={cfg.enabled} onChange={(e) => setCfg({ enabled: e.target.checked })} />
+                    {def.icon} {def.label}
+                  </label>
+                  <p className="text-xs text-white/50">{def.hint}</p>
+                  <NumberField label="Cena (punkti)" value={cfg.price} onChange={(v) => setCfg({ price: v })} />
+                  {kind === 'time' && (
+                    <NumberField label="Papildu sekundes" value={t.settings.extraTimeSec} onChange={(v) => setSetting('extraTimeSec', v)} />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="col-span-full flex flex-wrap items-center gap-3 rounded-lg bg-black/20 p-3">
+          <DrawQuestionsButton s={s} />
+          <p className="flex-1 text-xs text-white/60">
+            Nejauši izlozē jautājumus no „Jautājumu bankas” visām vēl nesāktajām spēlēm (tēmas sajauktas, jau uzdotie neatkārtojas), zelta
+            jautājumus un fināla tēzes no „Debašu tēžu bankas”.
+          </p>
+        </div>
         <p className="col-span-full text-xs text-white/40">
           Fināla tēmas veido kā jautājumu kopu: jautājuma teksts = debašu tēze, atbilde nav vajadzīga. Mainot laiku vai tēmu skaitu, pielāgojiet
           noteikumu slaidus „Fināls: …” (cilne „Noteikumi”).

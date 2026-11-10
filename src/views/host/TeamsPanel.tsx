@@ -25,7 +25,7 @@ export function TeamsPanel() {
         color: TEAM_COLORS[n % TEAM_COLORS.length],
         captain: '',
         members: [],
-        score: 0,
+        score: d.tournament.settings.startingScore ?? 0,
       });
     });
 

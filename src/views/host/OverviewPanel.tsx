@@ -6,6 +6,7 @@ import { toPublicView } from '../../lib/publicView';
 import { Bracket } from '../../components/Bracket';
 import { TeamBadge } from '../../components/common';
 import { formatClock } from '../../lib/util';
+import { DrawQuestionsButton } from '../../components/DrawQuestionsButton';
 
 export function OverviewPanel({ s, onGoLive }: { s: AppState; onGoLive: () => void }) {
   const t = s.tournament;
@@ -77,6 +78,7 @@ export function OverviewPanel({ s, onGoLive }: { s: AppState; onGoLive: () => vo
           >
             🎲 Izlozēt pārus
           </button>
+          <DrawQuestionsButton s={s} />
         </div>
       )}
 

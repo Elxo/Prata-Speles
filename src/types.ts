@@ -39,6 +39,8 @@ export interface QuestionSet {
   id: ID;
   name: string;
   questions: Question[];
+  /** Banka, no kuras izlozē jautājumus spēlēm vai tēzes finālam. */
+  bank?: 'questions' | 'theses';
 }
 
 // ── Komandas ────────────────────────────────────────────────
@@ -69,6 +71,24 @@ export type Slot =
 
 /** No kuriem ranžē: uzvarētājiem (noklusējums) vai zaudētājiem ("labākais zaudētājs"). */
 export type RankPool = 'winners' | 'losers';
+
+// ── Papildiespējas ──────────────────────────────────────────
+
+/** Papildiespējas, ko komanda dueļa laikā var nopirkt par saviem kopējiem punktiem. */
+export type PowerUpKind = 'audience' | 'double' | 'time' | 'pass';
+
+export interface PowerUpConfig {
+  enabled: boolean;
+  /** Cena kopējos punktos. */
+  price: number;
+}
+
+export interface PowerUpUse {
+  kind: PowerUpKind;
+  side: Side;
+  questionId: ID;
+  price: number;
+}
 
 export type MatchKind = 'duel' | 'final';
 export type AnswerMode = 'turns' | 'buzzer';
@@ -115,6 +135,8 @@ export interface Match {
   finalLog: Record<ID, FinalRecord>;
   /** Izmantotie zelta jautājumi. */
   goldenUsed: ID[];
+  /** Nopirktās papildiespējas šajā spēlē. */
+  powerUps: PowerUpUse[];
   result?: MatchResult;
 }
 
@@ -132,6 +154,8 @@ export interface RuleSlide {
 
 export interface Settings {
   defaultTimerSec: number;
+  /** Cik jautājumu izlozēt katram duelim no jautājumu bankas. */
+  questionsPerGame: number;
   /** Fināla debašu tēmu skaits. */
   finalQuestionCount: number;
   /** Kopējais debašu laiks visām tēmām (s). */
@@ -139,6 +163,16 @@ export interface Settings {
   imageRevealSteps: number;
   /** Maksimālie žūrijas punkti vienai komandai par vienu tēmu. */
   debateMaxPoints: number;
+  /** Ar cik punktiem katra komanda sāk turnīru. */
+  startingScore: number;
+  /** Papildiespēju cenas un ieslēgšana. */
+  powerUps: Record<PowerUpKind, PowerUpConfig>;
+  /** Cik sekundes pieliek papildiespēja „Papildu laiks”. */
+  extraTimeSec: number;
+  /** Cik reizes dārgāk maksā papildiespējas komandai, kas pašlaik vada pēc kopējiem punktiem. */
+  leaderPriceMultiplier: number;
+  /** Maks. papildiespēju skaits vienai komandai vienā spēlē (0 = bez ierobežojuma). */
+  powerUpsPerGame: number;
 }
 
 export interface Tournament {
@@ -186,14 +220,18 @@ export interface FinalLive {
   scored: boolean;
 }
 
-export type EventKind = 'correct' | 'wrong' | 'reveal' | 'fanfare' | 'win' | 'jury' | 'show' | 'golden' | 'adjust';
+export type EventKind = 'correct' | 'wrong' | 'reveal' | 'fanfare' | 'win' | 'jury' | 'show' | 'golden' | 'adjust' | 'powerup';
 
 export interface LiveEvent {
   n: number;
   kind: EventKind;
   side?: Side;
   delta?: number;
+  powerUp?: PowerUpKind;
 }
+
+/** 'text' — fināla video tēzei: pārtraukt video un rādīt tēzes tekstu. */
+export type MediaCmd = 'play' | 'pause' | 'stop' | 'text';
 
 export interface Live {
   screen: ScreenMode;
@@ -208,7 +246,7 @@ export interface Live {
   activeSide: Side | null;
   golden: { active: boolean; questionId: ID | null; tries: Pair<boolean> };
   final: FinalLive;
-  media: { cmd: 'play' | 'pause' | 'stop'; n: number };
+  media: { cmd: MediaCmd; n: number };
   event: LiveEvent | null;
   sound: boolean;
 }

@@ -105,6 +105,12 @@ export function TeamPanel({
     if (!event || event.n <= seen.current) return;
     seen.current = event.n;
     if (event.side !== side) return;
+    if (event.kind === 'powerup' && event.delta) {
+      const item = { n: event.n, delta: event.delta };
+      setFloats((f) => [...f, item]);
+      setTimeout(() => setFloats((f) => f.filter((x) => x !== item)), 2100);
+      return;
+    }
     if (event.kind === 'correct' || event.kind === 'wrong' || event.kind === 'adjust') {
       const good = event.kind === 'correct' || (event.kind === 'adjust' && (event.delta ?? 0) > 0);
       setFlash(good ? 'good' : 'bad');

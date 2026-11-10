@@ -2,7 +2,7 @@
 //  Spēles dzinējs: tīras funkcijas, kas maina (immer) melnrakstu.
 //  UI tās izsauc caur act() — skat. apakšā.
 // ─────────────────────────────────────────────────────────────
-import type { AppState, EventKind, Match, Mark, ScreenMode, Side, TimerState } from '../types';
+import type { AppState, EventKind, LiveEvent, Match, Mark, MediaCmd, PowerUpKind, ScreenMode, Side, TimerState } from '../types';
 import { createFinalLive, createLive } from './defaults';
 import {
   advance,
@@ -29,8 +29,8 @@ export function nextEventId(prev: number | undefined): number {
   return Math.max(Date.now(), (prev ?? 0) + 1);
 }
 
-function bump(s: Draft, kind: EventKind, side?: Side, delta?: number) {
-  s.live.event = { n: nextEventId(s.live.event?.n), kind, side, delta };
+function bump(s: Draft, kind: EventKind, side?: Side, delta?: number, extra: Partial<LiveEvent> = {}) {
+  s.live.event = { n: nextEventId(s.live.event?.n), kind, side, delta, ...extra };
 }
 
 function liveMatch(s: Draft): Match {
@@ -156,7 +156,7 @@ export function imageRevealMore(s: Draft) {
   s.live.imageStep += 1;
 }
 
-export function mediaCommand(s: Draft, cmd: 'play' | 'pause' | 'stop') {
+export function mediaCommand(s: Draft, cmd: MediaCmd) {
   s.live.media = { cmd, n: nextEventId(s.live.media.n) };
 }
 
@@ -200,7 +200,8 @@ export function mark(s: Draft, side: Side, result: Exclude<Mark, null> | null) {
   const marks = (m.marks[q.id] ??= [null, null]);
   const old = marks[side];
   if (old === result) return;
-  const value = (r: Mark) => (r === 'correct' ? q.points : 0);
+  const mult = hasPowerUp(m, side, q.id, 'double') ? 2 : 1;
+  const value = (r: Mark) => (r === 'correct' ? q.points * mult : 0);
   const delta = value(result) - value(old);
   marks[side] = result;
   addPoints(s, m, side, delta);
@@ -220,6 +221,84 @@ export function adjustScore(s: Draft, teamId: string, delta: number) {
   } else {
     team.score += delta;
   }
+}
+
+// ── Papildiespējas ──────────────────────────────────────────
+
+export function hasPowerUp(m: Match, side: Side, questionId: string, kind: PowerUpKind): boolean {
+  return (m.powerUps ?? []).some((u) => u.side === side && u.questionId === questionId && u.kind === kind);
+}
+
+/** Vai komanda pašlaik vada (pēc kopējiem punktiem) savā spēlē. */
+export function isLeader(s: AppState, side: Side): boolean {
+  const m = currentMatch(s);
+  if (!m) return false;
+  const own = teamById(s.tournament, m.teams[side])?.score ?? 0;
+  const other = teamById(s.tournament, m.teams[1 - side])?.score ?? 0;
+  return own > other;
+}
+
+/** Papildiespējas cena komandai: vadošā komanda maksā vairāk. */
+export function powerUpPrice(s: AppState, side: Side, kind: PowerUpKind): number {
+  const st = s.tournament.settings;
+  const base = st.powerUps?.[kind]?.price ?? 0;
+  return isLeader(s, side) ? Math.round(base * (st.leaderPriceMultiplier || 1)) : base;
+}
+
+/** Cik papildiespēju komanda jau nopirkusi pašreizējā spēlē. */
+export function powerUpsBought(s: AppState, side: Side): number {
+  return (currentMatch(s)?.powerUps ?? []).filter((u) => u.side === side).length;
+}
+
+/** Kāpēc komanda pašlaik nevar nopirkt papildiespēju (null = var). */
+export function powerUpBlock(s: AppState, side: Side, kind: PowerUpKind): string | null {
+  const m = currentMatch(s);
+  const q = currentQuestion(s);
+  const cfg = s.tournament.settings.powerUps?.[kind];
+  if (!m || m.status !== 'live' || m.kind !== 'duel') return 'Tikai dueļos';
+  if (!cfg?.enabled) return 'Izslēgta redaktorā';
+  if (s.live.golden.active) return 'Ne zelta jautājumā';
+  if (!q) return 'Nav jautājuma';
+  if (hasPowerUp(m, side, q.id, kind)) return 'Jau izmantota šim jautājumam';
+  const limit = s.tournament.settings.powerUpsPerGame;
+  if (limit > 0 && powerUpsBought(s, side) >= limit) return `Limits sasniegts (${limit} spēlē)`;
+  const team = teamById(s.tournament, m.teams[side]);
+  if (!team || team.score < powerUpPrice(s, side, kind)) return 'Nepietiek punktu';
+  const marks = m.marks[q.id];
+  if (marks?.[side]) return 'Komanda jau atbildēja';
+  if (kind === 'double') return s.live.shown ? 'Jāpiesaka pirms jautājuma' : null;
+  if (!s.live.shown) return 'Vispirms parādiet jautājumu';
+  if (s.live.revealed) return 'Atbilde jau atklāta';
+  if (kind === 'pass') {
+    if (s.live.activeSide !== side) return 'Nodot var tikai atbildētāja komanda';
+    if (marks?.[(1 - side) as Side]) return 'Pretinieki jau atbildēja';
+  }
+  return null;
+}
+
+export function buyPowerUp(s: Draft, side: Side, kind: PowerUpKind) {
+  if (powerUpBlock(s, side, kind)) return;
+  const m = liveMatch(s);
+  const q = currentQuestion(s)!;
+  const team = teamById(s.tournament, m.teams[side])!;
+  const price = powerUpPrice(s, side, kind);
+  // Cena tiek atņemta no KOPĒJIEM punktiem (dueļa punkti nemainās).
+  team.score -= price;
+  (m.powerUps ??= []).push({ kind, side, questionId: q.id, price });
+
+  if (kind === 'time') {
+    const running = !!s.live.timer.startedAt;
+    timerPause(s);
+    s.live.timer.durationMs += s.tournament.settings.extraTimeSec * 1000;
+    if (running) timerStart(s);
+  }
+  if (kind === 'pass') {
+    const running = !!s.live.timer.startedAt;
+    s.live.activeSide = (1 - side) as Side;
+    timerReset(s, questionTime(m, q) * 1000);
+    if (running) timerStart(s);
+  }
+  bump(s, 'powerup', side, -price, { powerUp: kind });
 }
 
 // ── Spēles beigas un zelta jautājums ────────────────────────
@@ -355,7 +434,7 @@ export function setSeed(s: Draft, matchId: string, index: Side, teamId: string |
 /** Atiestata turnīra progresu (punkti, rezultāti), saglabājot komandas, jautājumus un pārus. */
 export function resetProgress(s: Draft, keepPairs = true) {
   const t = s.tournament;
-  t.teams.forEach((x) => (x.score = 0));
+  t.teams.forEach((x) => (x.score = t.settings.startingScore ?? 0));
   t.championId = null;
   for (const m of t.matches) {
     m.status = 'pending';
@@ -363,6 +442,7 @@ export function resetProgress(s: Draft, keepPairs = true) {
     m.marks = {};
     m.finalLog = {};
     m.goldenUsed = [];
+    m.powerUps = [];
     delete m.result;
     m.teams = m.slots.map((slot, i) => (slot.kind === 'seed' && keepPairs ? m.teams[i] : null)) as [string | null, string | null];
   }
