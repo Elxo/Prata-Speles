@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { AppState, Tournament } from '../../types';
 import { commit, replaceState } from '../../lib/store';
 import { CSV_TEMPLATE, exportJSON, importJSON, readSpreadsheet, rowsToQuestions, type ImportResult } from '../../lib/io';
-import { createDemoState } from '../../data/demo';
+import { createDemoState, questionBanks } from '../../data/demo';
 import { createLive, DEFAULT_SETTINGS, defaultRules, TEAM_COLORS } from '../../lib/defaults';
 import { getScheme } from '../../lib/schemes';
 import { downloadText, normalize, uid } from '../../lib/util';
@@ -112,7 +112,7 @@ export function ImportExportTab({ s }: { s: AppState }) {
           score: settings.startingScore,
         })),
         matches: getScheme('six')!.build(settings),
-        questionSets: [],
+        questionSets: questionBanks(),
         goldenSetId: null,
         rules: defaultRules(),
         settings,

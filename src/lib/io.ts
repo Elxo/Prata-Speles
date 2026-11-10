@@ -5,6 +5,7 @@ import { produce } from 'immer';
 import type { AppState, Question, QuestionType, Tournament } from '../types';
 import { createFinalLive, createLive, DEFAULT_QUESTION_POINTS, DEFAULT_SETTINGS } from './defaults';
 import { normalize, uid } from './util';
+import { questionBanks } from '../data/demo';
 
 const FORMAT = 'prata-speles';
 
@@ -76,6 +77,9 @@ export function migrateState(s: AppState): AppState {
     st.leaderPriceMultiplier ??= DEFAULT_SETTINGS.leaderPriceMultiplier;
     st.powerUpsPerGame ??= DEFAULT_SETTINGS.powerUpsPerGame;
     for (const m of d.tournament.matches) m.powerUps ??= [];
+    // Vecākiem turnīriem nav jautājumu/tēžu bankas — bez tās nevar izlozēt jautājumus.
+    const sets = d.tournament.questionSets;
+    for (const bank of questionBanks()) if (!sets.some((x) => x.bank === bank.bank)) sets.push(bank);
     if (!('forSide' in d.live.final)) d.live.final = createFinalLive();
   });
 }
