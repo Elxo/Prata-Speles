@@ -23,7 +23,7 @@ const EVENT_SOUND: Partial<Record<EventKind, SoundName>> = {
   reveal: 'reveal',
   fanfare: 'fanfare',
   win: 'win',
-  bets: 'bets',
+  jury: 'bets',
   show: 'show',
   golden: 'golden',
 };

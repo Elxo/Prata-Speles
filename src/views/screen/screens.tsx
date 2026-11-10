@@ -119,7 +119,7 @@ export function MatchIntroScreen({ view }: { view: PublicView }) {
       </div>
       <div className="anim-fade delay-5 text-3xl font-bold text-white/60">
         {m.kind === 'final'
-          ? `${m.questionCount} jautājumi · likmes pirms katra jautājuma`
+          ? `Debates · ${m.questionCount} ${m.questionCount === 1 ? 'tēma' : 'tēmas'} · „par” un „pret”`
           : `${m.questionCount} jautājumi · ${m.answerMode === 'turns' ? 'atbild pēc kārtas' : 'atbild, kurš pirmais nospiež pogu'}`}
       </div>
     </div>

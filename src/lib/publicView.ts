@@ -76,13 +76,12 @@ export interface PublicQuestion {
 }
 
 export interface PublicFinal {
-  stage: 'bet' | 'question';
-  betsLocked: Pair<boolean>;
-  betsRevealed: boolean;
-  bets: Pair<number | null>;
-  revealed: Pair<boolean>;
-  answers: Pair<string | null>;
-  verdict: Pair<boolean | null>;
+  /** Komanda, kas aizstāv tēzi („par”). */
+  forSide: Side;
+  scored: boolean;
+  /** Žūrijas punkti — tikai pēc piešķiršanas. */
+  jury: Pair<number | null>;
+  maxPoints: number;
 }
 
 export interface PublicView {
@@ -177,13 +176,10 @@ export function toPublicView(s: AppState): PublicView {
   const final: PublicFinal | null =
     m?.kind === 'final'
       ? {
-          stage: f.stage,
-          betsLocked: f.betsLocked,
-          betsRevealed: f.betsRevealed,
-          bets: f.betsRevealed ? f.bets : [null, null],
-          revealed: f.revealed,
-          answers: [f.revealed[0] ? f.answers[0] : null, f.revealed[1] ? f.answers[1] : null],
-          verdict: [f.revealed[0] ? f.verdict[0] : null, f.revealed[1] ? f.verdict[1] : null],
+          forSide: f.forSide,
+          scored: f.scored,
+          jury: f.scored ? f.jury : [null, null],
+          maxPoints: t.settings.debateMaxPoints,
         }
       : null;
 

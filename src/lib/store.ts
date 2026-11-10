@@ -7,6 +7,7 @@ import { useSyncExternalStore } from 'react';
 import { produce } from 'immer';
 import type { AppState } from '../types';
 import { createDemoState } from '../data/demo';
+import { migrateState } from './io';
 import { uid } from './util';
 
 const STORAGE_KEY = 'prata-speles:state:v1';
@@ -62,7 +63,7 @@ function load(): AppState | null {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as AppState;
-    return parsed?.version === 1 && parsed.tournament && parsed.live ? parsed : null;
+    return parsed?.version === 1 && parsed.tournament && parsed.live ? migrateState(parsed) : null;
   } catch {
     return null;
   }

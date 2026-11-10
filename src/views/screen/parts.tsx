@@ -3,6 +3,7 @@ import type { TimerState, Side, LiveEvent } from '../../types';
 import type { PublicTeam } from '../../lib/publicView';
 import { AnimatedNumber, TeamBadge, shade, useRemaining } from '../../components/common';
 import { playSound } from '../../lib/sounds';
+import { formatClock } from '../../lib/util';
 
 // ── Taimeris ────────────────────────────────────────────────
 
@@ -42,8 +43,8 @@ export function TimerRing({ timer, size = 260 }: { timer: TimerState; size?: num
             LAIKS!
           </span>
         ) : (
-          <span className="font-black tabular-nums" style={{ fontSize: size * 0.4, color: danger ? '#ff6b86' : 'white' }}>
-            {secs}
+          <span className="font-black tabular-nums" style={{ fontSize: size * (secs < 60 ? 0.4 : 0.24), color: danger ? '#ff6b86' : 'white' }}>
+            {formatClock(secs)}
           </span>
         )}
         {!running && remaining > 0 && remaining < timer.durationMs && (

@@ -5,23 +5,10 @@
 // ─────────────────────────────────────────────────────────────
 import { useEffect, useMemo, useState } from 'react';
 import { produce } from 'immer';
-import type { AppState, Side } from '../../types';
+import type { AppState } from '../../types';
 import { createDemoState } from '../../data/demo';
 import { advance } from '../../lib/tournament';
-import {
-  endMatch,
-  lockBet,
-  mark,
-  revealAnswer,
-  revealBets,
-  revealFinalSide,
-  setBet,
-  setFinalAnswer,
-  setScreen,
-  showQuestion,
-  startMatch,
-  timerStart,
-} from '../../lib/engine';
+import { endMatch, nextQuestion, scoreTopic, setJury, setScreen, showQuestion, showQuestionTeaser, startMatch, timerPause, timerStart } from '../../lib/engine';
 import { toPublicView } from '../../lib/publicView';
 import { routeHref } from '../../lib/env';
 import { Stage } from '../../components/Stage';
@@ -61,9 +48,10 @@ function tournamentBeforeFinal(): AppState {
 type Step = { label: string; apply: (d: AppState) => void };
 
 const final = (d: AppState) => d.tournament.matches.find((m) => m.kind === 'final')!;
-const bet = (d: AppState, side: Side, amount: number) => {
-  setBet(d, side, amount);
-  lockBet(d, side, true);
+const jury = (d: AppState, a: number, b: number) => {
+  setJury(d, 0, a);
+  setJury(d, 1, b);
+  scoreTopic(d);
 };
 
 /** Katrs solis turpina iepriekšējo (izņemot pirmo — turnīra koku). */
@@ -71,31 +59,29 @@ const STEPS: Step[] = [
   { label: 'Ceļš uz finālu', apply: (d) => setScreen(d, 'bracket') },
   { label: 'Fināla noteikumi', apply: (d) => startMatch(d, final(d).id) },
   { label: 'Ievads', apply: (d) => setScreen(d, 'matchIntro') },
-  { label: 'Likmes tiek liktas', apply: (d) => bet(d, 0, 100) },
+  { label: '1. tēma', apply: (d) => showQuestionTeaser(d) },
   {
-    label: 'Likmes atklātas',
-    apply: (d) => {
-      bet(d, 1, 60);
-      revealBets(d);
-    },
-  },
-  {
-    label: 'Jautājums',
+    label: 'Debates',
     apply: (d) => {
       showQuestion(d);
       timerStart(d);
     },
   },
   {
-    label: 'Atbildes atklātas',
+    label: 'Žūrijas punkti',
     apply: (d) => {
-      setFinalAnswer(d, 0, 'Nacionālajā teātrī');
-      setFinalAnswer(d, 1, 'Rīgas pilī');
-      mark(d, 0, 'correct');
-      mark(d, 1, 'wrong');
-      revealFinalSide(d, 0);
-      revealFinalSide(d, 1);
-      revealAnswer(d);
+      // Kopīgais pulkstenis: izliekamies, ka pirmā tēma aizņēmusi 7 minūtes.
+      timerPause(d);
+      d.live.timer.elapsedMs = 7 * 60 * 1000;
+      jury(d, 24, 18);
+    },
+  },
+  {
+    label: '2. tēma',
+    apply: (d) => {
+      nextQuestion(d);
+      showQuestion(d);
+      timerStart(d);
     },
   },
   { label: 'Uzvarētājs', apply: (d) => endMatch(d) },

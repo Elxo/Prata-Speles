@@ -5,6 +5,7 @@ import { STATUS_LABEL, currentMatch, matchQuestions, nextPlayableMatch, slotLabe
 import { toPublicView } from '../../lib/publicView';
 import { Bracket } from '../../components/Bracket';
 import { TeamBadge } from '../../components/common';
+import { formatClock } from '../../lib/util';
 
 export function OverviewPanel({ s, onGoLive }: { s: AppState; onGoLive: () => void }) {
   const t = s.tournament;
@@ -94,7 +95,7 @@ export function OverviewPanel({ s, onGoLive }: { s: AppState; onGoLive: () => vo
                 <div className="w-48">
                   <div className="font-bold">{m.title}</div>
                   <div className="text-xs text-white/50">
-                    {qs} jaut. · {m.kind === 'final' ? 'likmes' : m.answerMode === 'turns' ? 'pēc kārtas' : 'ar pogu'} · {m.timerSec}s
+                    {m.kind === 'final' ? `${qs} tēmas · debates · ${formatClock(m.timerSec)}` : `${qs} jaut. · ${m.answerMode === 'turns' ? 'pēc kārtas' : 'ar pogu'} · ${m.timerSec}s`}
                   </div>
                 </div>
                 <div className="flex flex-1 flex-wrap items-center gap-2">

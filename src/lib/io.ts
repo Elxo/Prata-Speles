@@ -1,8 +1,9 @@
 // ─────────────────────────────────────────────────────────────
 //  Imports / eksports: JSON (viss turnīrs), CSV un Excel (jautājumi).
 // ─────────────────────────────────────────────────────────────
+import { produce } from 'immer';
 import type { AppState, Question, QuestionType, Tournament } from '../types';
-import { createLive } from './defaults';
+import { createFinalLive, createLive, DEFAULT_SETTINGS } from './defaults';
 import { normalize, uid } from './util';
 
 const FORMAT = 'prata-speles';
@@ -21,13 +22,32 @@ export function importJSON(text: string, current: AppState): AppState {
   const data = JSON.parse(text);
   if (data?.format !== FORMAT) throw new Error('Tas nav „Prāta spēļu” fails.');
   if (data.state?.tournament && data.state?.live) {
-    return { ...data.state, version: 1, live: { ...createLive(), ...data.state.live, sound: current.live.sound } };
+    return migrateState({ ...data.state, version: 1, live: { ...createLive(), ...data.state.live, sound: current.live.sound } });
   }
   if (data.tournament) {
     validateTournament(data.tournament);
-    return { version: 1, tournament: data.tournament, live: { ...createLive(), sound: current.live.sound } };
+    return migrateState({ version: 1, tournament: data.tournament, live: { ...createLive(), sound: current.live.sound } });
   }
   throw new Error('Failā nav atrasts turnīrs.');
+}
+
+/** Vecāku versiju dati (fināls ar likmēm) → fināls ar debatēm. */
+export function migrateState(s: AppState): AppState {
+  return produce(s, (d) => {
+    const st = d.tournament.settings as Partial<AppState['tournament']['settings']> & { finalBetCap?: string };
+    if (st.debateMaxPoints == null) {
+      st.debateMaxPoints = DEFAULT_SETTINGS.debateMaxPoints;
+      st.finalQuestionCount = DEFAULT_SETTINGS.finalQuestionCount;
+      st.finalTimerSec = DEFAULT_SETTINGS.finalTimerSec;
+      delete st.finalBetCap;
+      for (const m of d.tournament.matches) {
+        if (m.kind !== 'final') continue;
+        m.questionCount = DEFAULT_SETTINGS.finalQuestionCount;
+        m.timerSec = DEFAULT_SETTINGS.finalTimerSec;
+      }
+    }
+    if (!('forSide' in d.live.final)) d.live.final = createFinalLive();
+  });
 }
 
 function validateTournament(t: Tournament) {
@@ -163,7 +183,8 @@ export function rowsToQuestions(rows: string[][], defaultPoints = 10): ImportRes
       }
       answer = options[correctOption];
     }
-    if (!answer) warnings.push(`${i + 2}. rinda: nav norādīta atbilde.`);
+    // Fināla debašu tēzēm atbildes nav.
+    if (!answer && normalize(get('game')) !== 'finals') warnings.push(`${i + 2}. rinda: nav norādīta atbilde.`);
 
     const points = parseInt(get('points'), 10);
     const time = parseInt(get('time'), 10);
@@ -194,6 +215,6 @@ export const CSV_TEMPLATE = [
   '1;Ģeogrāfija;Kā sauc Latvijas augstāko virsotni?;Gaiziņkalns;10;30;;;;;;;311,9 m',
   '1;Vēsture;Kurā gadā dibināta Rīga?;B;20;30;varianti;1185;1201;1282;1300;;',
   '2;Sports;Kurā sporta veidā pazīstams Mārtiņš Dukurs?;Skeletonā;20;;skatītāju;;;;;Ilze no Cēsīm;',
-  'Fināls;Kultūra;Kas uzrakstīja „Lāčplēsi”?;Andrejs Pumpurs;0;45;;;;;;;',
+  'Fināls;Izglītība;Skolās jāaizliedz mobilie tālruņi.;;0;;;;;;;;debašu tēze — atbildes nav',
   'Zelta;Vēsture;Kurā gadā ieviesa eiro?;2014;10;;;;;;;;',
 ].join('\r\n');

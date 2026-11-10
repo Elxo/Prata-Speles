@@ -76,10 +76,20 @@ function resetQuestionState(s: Draft) {
   s.live.shown = false;
   s.live.revealed = false;
   s.live.imageStep = 0;
-  s.live.final = createFinalLive();
+  // Debatēs komandas pēc katras tēmas samaina puses.
+  s.live.final = createFinalLive((s.live.qIndex % 2) as Side);
   s.live.media = { cmd: 'stop', n: nextEventId(s.live.media.n) };
-  s.live.activeSide = m && m.answerMode === 'turns' && !s.live.golden.active ? ((s.live.qIndex % 2) as Side) : null;
-  timerReset(s, (m ? questionTime(m, q) : 30) * 1000);
+  s.live.activeSide = m && m.answerMode === 'turns' && !s.live.golden.active && m.kind !== 'final' ? ((s.live.qIndex % 2) as Side) : null;
+  // Finālā viens kopīgs debašu pulkstenis visām tēmām — mainot tēmu, to nepārstata.
+  if (isDebate(s)) return;
+  // Zelta jautājumam finālā — dueļu taimeris, nevis debašu laiks.
+  const secs = m?.kind === 'final' ? q?.timeSec || s.tournament.settings.defaultTimerSec : m ? questionTime(m, q) : 30;
+  timerReset(s, secs * 1000);
+}
+
+/** Notiek fināla debates (nevis duelis vai zelta jautājums). */
+export function isDebate(s: AppState): boolean {
+  return currentMatch(s)?.kind === 'final' && !s.live.golden.active;
 }
 
 export function startMatch(s: Draft, matchId: string) {
@@ -92,6 +102,7 @@ export function startMatch(s: Draft, matchId: string) {
   s.live.qIndex = 0;
   s.live.golden = { active: false, questionId: null, tries: [false, false] };
   resetQuestionState(s);
+  if (m.kind === 'final') timerReset(s, m.timerSec * 1000);
   const hasFinalRules = s.tournament.rules.some((r) => r.final);
   if (m.kind === 'final' && hasFinalRules) {
     s.live.rules = { deck: 'final', index: 0, then: 'matchIntro' };
@@ -102,11 +113,9 @@ export function startMatch(s: Draft, matchId: string) {
 }
 
 export function showQuestion(s: Draft) {
-  const m = liveMatch(s);
   if (!currentQuestion(s)) return;
   s.live.screen = 'question';
   s.live.shown = true;
-  if (m.kind === 'final') s.live.final.stage = 'question';
   bump(s, 'show');
 }
 
@@ -116,7 +125,7 @@ export function showQuestionTeaser(s: Draft) {
 }
 
 export function revealAnswer(s: Draft) {
-  if (!currentQuestion(s)) return;
+  if (!currentQuestion(s) || isDebate(s)) return;
   s.live.screen = 'question';
   s.live.shown = true;
   s.live.revealed = true;
@@ -164,7 +173,7 @@ function addPoints(s: Draft, m: Match, side: Side, delta: number) {
   m.points[side] += delta;
 }
 
-/** Pareizi / nepareizi. Dueļos piešķir punktus, finālā — fiksē slēpto vērtējumu, zelta jautājumā — izšķir. */
+/** Pareizi / nepareizi. Dueļos piešķir punktus, zelta jautājumā — izšķir. Debatēs neizmanto. */
 export function mark(s: Draft, side: Side, result: Exclude<Mark, null> | null) {
   const m = liveMatch(s);
   const q = currentQuestion(s);
@@ -186,11 +195,7 @@ export function mark(s: Draft, side: Side, result: Exclude<Mark, null> | null) {
     return;
   }
 
-  if (m.kind === 'final') {
-    if (s.live.final.revealed[side]) return;
-    s.live.final.verdict[side] = result === null ? null : result === 'correct';
-    return;
-  }
+  if (m.kind === 'final') return;
 
   const marks = (m.marks[q.id] ??= [null, null]);
   const old = marks[side];
@@ -272,59 +277,34 @@ function finishMatch(s: Draft, winner: Side, decidedBy: 'points' | 'golden' | 'm
   }
 }
 
-// ── Fināla likmes ───────────────────────────────────────────
+// ── Fināla debates ──────────────────────────────────────────
 
-export function maxBet(s: AppState, side: Side): number {
-  const m = currentMatch(s);
-  const score = (i: Side) => Math.max(0, teamById(s.tournament, m?.teams[i])?.score ?? 0);
-  const own = score(side);
-  return s.tournament.settings.finalBetCap === 'lower' ? Math.min(own, score((1 - side) as Side)) : own;
-}
-
-export function setBet(s: Draft, side: Side, amount: number) {
-  if (s.live.final.betsLocked[side]) return;
-  s.live.final.bets[side] = clamp(Math.round(amount) || 0, 0, maxBet(s, side));
-}
-
-export function lockBet(s: Draft, side: Side, locked: boolean) {
-  if (s.live.final.betsRevealed) return;
-  if (locked && s.live.final.bets[side] === null) s.live.final.bets[side] = 0;
-  s.live.final.betsLocked[side] = locked;
-  // Ekrānā parādās likmju statuss ("Likme likta ✓").
-  if (locked && s.live.screen === 'matchIntro') s.live.screen = 'question';
-}
-
-export function revealBets(s: Draft) {
+export function swapDebateSides(s: Draft) {
   const f = s.live.final;
-  if (!f.betsLocked[0] || !f.betsLocked[1]) return;
-  f.betsRevealed = true;
-  s.live.screen = 'question';
-  bump(s, 'bets');
+  if (f.scored) return;
+  f.forSide = (1 - f.forSide) as Side;
 }
 
-export function setFinalAnswer(s: Draft, side: Side, text: string) {
-  s.live.final.answers[side] = text;
+export function setJury(s: Draft, side: Side, amount: number) {
+  const f = s.live.final;
+  if (f.scored) return;
+  f.jury[side] = clamp(Math.round(amount) || 0, 0, s.tournament.settings.debateMaxPoints);
 }
 
-export function revealFinalSide(s: Draft, side: Side) {
+/** Pieskaita žūrijas punktus par pašreizējo tēmu un parāda tos ekrānā. */
+export function scoreTopic(s: Draft) {
   const m = liveMatch(s);
   const q = currentQuestion(s);
   const f = s.live.final;
-  const verdict = f.verdict[side];
-  if (!q || verdict === null || f.revealed[side]) return;
-  const bet = f.bets[side] ?? 0;
-  const delta = verdict ? bet : -bet;
-  addPoints(s, m, side, delta);
-  f.revealed[side] = true;
+  if (!q || f.scored || f.jury[0] === null || f.jury[1] === null) return;
+  const jury: [number, number] = [f.jury[0], f.jury[1]];
+  addPoints(s, m, 0, jury[0]);
+  addPoints(s, m, 1, jury[1]);
+  f.scored = true;
+  m.finalLog[q.id] = { forSide: f.forSide, jury };
   timerPause(s);
-  if (f.revealed[0] && f.revealed[1]) {
-    m.finalLog[q.id] = {
-      bets: [f.bets[0] ?? 0, f.bets[1] ?? 0],
-      answers: [...f.answers] as [string, string],
-      verdict: [!!f.verdict[0], !!f.verdict[1]],
-    };
-  }
-  bump(s, verdict ? 'correct' : 'wrong', side, delta);
+  s.live.screen = 'question';
+  bump(s, 'jury');
 }
 
 // ── Ekrāni un noteikumi ─────────────────────────────────────

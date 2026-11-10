@@ -75,10 +75,11 @@ export type AnswerMode = 'turns' | 'buzzer';
 export type MatchStatus = 'pending' | 'live' | 'done';
 export type Mark = 'correct' | 'wrong' | null;
 
+/** Fināla debašu tēmas rezultāts. */
 export interface FinalRecord {
-  bets: Pair<number>;
-  answers: Pair<string>;
-  verdict: Pair<boolean>;
+  /** Komanda, kas aizstāvēja tēzi („par”). */
+  forSide: Side;
+  jury: Pair<number>;
 }
 
 export interface MatchResult {
@@ -110,7 +111,7 @@ export interface Match {
   points: Pair<number>;
   /** Atzīmes katram jautājumam (pēc jautājuma ID). */
   marks: Record<ID, Pair<Mark>>;
-  /** Fināla likmju vēsture (pēc jautājuma ID). */
+  /** Fināla debašu rezultāti (pēc tēmas ID). */
   finalLog: Record<ID, FinalRecord>;
   /** Izmantotie zelta jautājumi. */
   goldenUsed: ID[];
@@ -131,11 +132,13 @@ export interface RuleSlide {
 
 export interface Settings {
   defaultTimerSec: number;
+  /** Fināla debašu tēmu skaits. */
   finalQuestionCount: number;
+  /** Kopējais debašu laiks visām tēmām (s). */
   finalTimerSec: number;
   imageRevealSteps: number;
-  /** Fināla likmes ierobežojums: 'own' — līdz visiem saviem punktiem; 'lower' — ne vairāk kā mazākais no abu komandu punktiem. */
-  finalBetCap?: 'own' | 'lower';
+  /** Maksimālie žūrijas punkti vienai komandai par vienu tēmu. */
+  debateMaxPoints: number;
 }
 
 export interface Tournament {
@@ -174,19 +177,16 @@ export interface TimerState {
   elapsedMs: number;
 }
 
-export type FinalStage = 'bet' | 'question';
-
 export interface FinalLive {
-  stage: FinalStage;
-  bets: Pair<number | null>;
-  betsLocked: Pair<boolean>;
-  betsRevealed: boolean;
-  answers: Pair<string>;
-  verdict: Pair<boolean | null>;
-  revealed: Pair<boolean>;
+  /** Komanda, kas aizstāv tēzi („par”); otra — „pret”. */
+  forSide: Side;
+  /** Žūrijas punkti par pašreizējo tēmu. */
+  jury: Pair<number | null>;
+  /** Punkti piešķirti un parādīti ekrānā. */
+  scored: boolean;
 }
 
-export type EventKind = 'correct' | 'wrong' | 'reveal' | 'fanfare' | 'win' | 'bets' | 'show' | 'golden' | 'adjust';
+export type EventKind = 'correct' | 'wrong' | 'reveal' | 'fanfare' | 'win' | 'jury' | 'show' | 'golden' | 'adjust';
 
 export interface LiveEvent {
   n: number;

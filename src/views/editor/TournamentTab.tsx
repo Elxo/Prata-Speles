@@ -95,25 +95,18 @@ export function TournamentTab({ s }: { s: AppState }) {
 
       <div className="card grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <NumberField label="Taimeris dueļos (s)" value={t.settings.defaultTimerSec} onChange={(v) => setSetting('defaultTimerSec', v)} />
-        <NumberField label="Fināla jautājumu skaits" value={t.settings.finalQuestionCount} onChange={(v) => setSetting('finalQuestionCount', v)} />
-        <NumberField label="Fināla taimeris (s)" value={t.settings.finalTimerSec} onChange={(v) => setSetting('finalTimerSec', v)} />
         <NumberField label="Attēla atklāšanas soļi" value={t.settings.imageRevealSteps} onChange={(v) => setSetting('imageRevealSteps', v)} />
-        <div className="col-span-full">
-          <label className="label">Fināla likmes</label>
-          <select
-            className="input"
-            value={t.settings.finalBetCap ?? 'own'}
-            onChange={(e) => setSetting('finalBetCap', e.target.value as Settings['finalBetCap'])}
-          >
-            <option value="own">Līdz visiem saviem punktiem</option>
-            <option value="lower">Ne vairāk kā atpalicējas komandas punkti (mazāka plaisa)</option>
-          </select>
-          {t.settings.finalBetCap === 'lower' && (
-            <p className="mt-1 text-xs text-amber-300">
-              Atcerieties pielāgot noteikumu slaidu „Fināls: likmes” (cilne „Noteikumi”), lai komandas zina par ierobežojumu.
-            </p>
-          )}
-        </div>
+        <NumberField label="Fināla debašu tēmu skaits" value={t.settings.finalQuestionCount} onChange={(v) => setSetting('finalQuestionCount', v)} />
+        <NumberField
+          label="Debašu laiks kopā (min)"
+          value={Math.round(t.settings.finalTimerSec / 60)}
+          onChange={(v) => setSetting('finalTimerSec', v * 60)}
+        />
+        <NumberField label="Žūrijas maks. punkti par tēmu" value={t.settings.debateMaxPoints} onChange={(v) => setSetting('debateMaxPoints', v)} />
+        <p className="col-span-full text-xs text-white/40">
+          Fināla tēmas veido kā jautājumu kopu: jautājuma teksts = debašu tēze, atbilde nav vajadzīga. Mainot laiku vai tēmu skaitu, pielāgojiet
+          noteikumu slaidus „Fināls: …” (cilne „Noteikumi”).
+        </p>
         <p className="col-span-full text-xs text-white/40">
           Noklusējuma vērtības jaunām spēlēm. Katrai spēlei tās var mainīt atsevišķi zemāk.
         </p>
@@ -204,7 +197,7 @@ function MatchEditor({ s, m, idx }: { s: AppState; m: Match; idx: number }) {
           <label className="label">Veids</label>
           <select className="input" value={m.kind} onChange={(e) => editMatch(m.id, (x) => void (x.kind = e.target.value as Match['kind']))}>
             <option value="duel">Duelis</option>
-            <option value="final">Fināls (likmes)</option>
+            <option value="final">Fināls (debates)</option>
           </select>
         </div>
         <div>
@@ -220,7 +213,7 @@ function MatchEditor({ s, m, idx }: { s: AppState; m: Match; idx: number }) {
           </select>
         </div>
         <div>
-          <label className="label">Taimeris (s)</label>
+          <label className="label">{m.kind === 'final' ? 'Debašu laiks kopā (s)' : 'Taimeris (s)'}</label>
           <input type="number" min={5} className="input" value={m.timerSec} onChange={(e) => editMatch(m.id, (x) => void (x.timerSec = Number(e.target.value) || 30))} />
         </div>
         <div className="md:col-span-3">
@@ -235,7 +228,7 @@ function MatchEditor({ s, m, idx }: { s: AppState; m: Match; idx: number }) {
           </select>
         </div>
         <div>
-          <label className="label">Jautājumu skaits</label>
+          <label className="label">{m.kind === 'final' ? 'Tēmu skaits' : 'Jautājumu skaits'}</label>
           <input
             type="number"
             min={0}

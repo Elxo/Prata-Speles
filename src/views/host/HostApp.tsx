@@ -50,8 +50,7 @@ function useHostKeys() {
         case 'ArrowRight':
           e.preventDefault();
           if (inRules) act((d) => rulesStep(d, 1));
-          else if (live && (m.kind !== 'final' || s.live.golden.active || (s.live.final.revealed[0] && s.live.final.revealed[1])))
-            act(nextQuestion);
+          else if (live && (m.kind !== 'final' || s.live.golden.active || s.live.final.scored)) act(nextQuestion);
           return;
         case 'ArrowLeft':
           e.preventDefault();
@@ -72,7 +71,7 @@ function useHostKeys() {
           if (live && s.live.shown) act(revealAnswer, 'Atklāt atbildi');
           return;
         case 'KeyS':
-          if (live && (m.kind !== 'final' || s.live.final.betsRevealed || s.live.golden.active)) act(showQuestion);
+          if (live) act(showQuestion);
           return;
         case 'KeyB':
           act((d) => setScreen(d, 'bracket'));

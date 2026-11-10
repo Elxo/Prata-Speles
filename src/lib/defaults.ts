@@ -1,25 +1,18 @@
-import type { FinalLive, Live, RuleSlide, Settings } from '../types';
+import type { FinalLive, Live, RuleSlide, Settings, Side } from '../types';
 import { uid } from './util';
 
 export const DEFAULT_SETTINGS: Settings = {
   defaultTimerSec: 30,
-  finalQuestionCount: 5,
-  finalTimerSec: 45,
+  finalQuestionCount: 3,
+  finalTimerSec: 20 * 60,
   imageRevealSteps: 4,
+  debateMaxPoints: 30,
 };
 
 export const TEAM_COLORS = ['#ff3d7f', '#2ec4ff', '#ffcc33', '#4ade80', '#b47cff', '#ff8a3d', '#f43f5e', '#14b8a6'];
 
-export function createFinalLive(): FinalLive {
-  return {
-    stage: 'bet',
-    bets: [null, null],
-    betsLocked: [false, false],
-    betsRevealed: false,
-    answers: ['', ''],
-    verdict: [null, null],
-    revealed: [false, false],
-  };
+export function createFinalLive(forSide: Side = 0): FinalLive {
+  return { forSide, jury: [null, null], scored: false };
 }
 
 export function createLive(): Live {
@@ -62,7 +55,7 @@ export function defaultRules(): RuleSlide[] {
     ),
     r(
       'Kā tiek piešķirti punkti',
-      'Katram jautājumam ir sava vērtība — 10, 20 vai 30 punkti.\nPar pareizu atbildi komanda saņem jautājuma punktus, par nepareizu — 0.\nDueli uzvar komanda, kas šajā spēlē ieguvusi vairāk punktu.',
+      'Par katru pareizu atbildi komanda saņem 10 punktus, par nepareizu — 0.\nDueli uzvar komanda, kas šajā spēlē ieguvusi vairāk punktu.',
     ),
     r(
       'Laiks',
@@ -77,13 +70,13 @@ export function defaultRules(): RuleSlide[] {
       'Ja duelis beidzas neizšķirti, tiek uzdots zelta jautājums.\nUzvar komanda, kas pirmā sniedz pareizo atbildi.',
     ),
     r(
-      'Fināls: likmes',
-      'Finālā ir 5 jautājumi.\nPIRMS katra jautājuma katra komanda liek likmi — no 0 līdz VISIEM saviem punktiem.\nPareiza atbilde: likme tiek pieskaitīta. Nepareiza atbilde: likme tiek atņemta.\nLiekot visu, punktus var dubultot — vai zaudēt visu!',
+      'Fināls: debates',
+      'Finālā komandas debatē par 3 tēzēm. Kopējais laiks — 20 minūtes.\nViena komanda aizstāv tēzi („PAR”), otra to apstrīd („PRET”).\nPēc katras tēmas komandas samaina puses.',
       { final: true },
     ),
     r(
-      'Fināls: atbildes',
-      'Abas komandas atbildes raksta vienlaikus uz lapas.\nVadītājs atbildes atklās pa vienai.\nUzvar komanda ar visvairāk kopējo punktu pēc pēdējā jautājuma.',
+      'Fināls: vērtēšana',
+      'Pēc katras tēmas žūrija piešķir katrai komandai līdz 30 punktiem.\nVērtē argumentus, pārliecināšanas spēju un atbildes pretiniekiem.\nŽūrijas punkti tiek pieskaitīti kopējiem punktiem — uzvar komanda ar visvairāk kopējo punktu.',
       { final: true },
     ),
   ];

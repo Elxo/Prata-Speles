@@ -9,10 +9,8 @@ export function QuestionScreen({ view }: { view: PublicView }) {
   const q = view.question;
   if (!m || !m.teams[0] || !m.teams[1]) return null;
   const teams = m.teams as [PublicTeam, PublicTeam];
-  const isFinal = m.kind === 'final';
   const golden = !!q?.golden;
-  const f = view.final;
-  const betting = isFinal && f?.stage === 'bet' && !golden;
+  if (m.kind === 'final' && !golden) return <DebateScreen view={view} m={m} teams={teams} />;
 
   return (
     <div className="absolute inset-0 flex flex-col px-16 pt-10 pb-10">
@@ -29,41 +27,25 @@ export function QuestionScreen({ view }: { view: PublicView }) {
         </div>
         <div className="flex items-center gap-4">
           {q?.topic && <span className="rounded-2xl bg-white/10 px-5 py-2">{q.topic}</span>}
-          {q && !isFinal && (
+          {q && (
             <span className="rounded-2xl bg-hot px-5 py-2">
               {q.points} {pointsWord(q.points)}
             </span>
           )}
-          {isFinal && !golden && <span className="rounded-2xl bg-hot px-5 py-2">LIKMES</span>}
         </div>
       </div>
 
       {/* Centrs */}
       <div className="relative flex flex-1 items-center gap-10 py-8">
         <div className="flex h-full flex-1 flex-col items-center justify-center gap-8">
-          {betting ? (
-            <BettingStage view={view} teams={teams} />
-          ) : !view.shown || !q ? (
-            <Teaser view={view} m={m} />
-          ) : (
-            <QuestionBody view={view} />
-          )}
+          {!view.shown || !q ? <Teaser view={view} m={m} /> : <QuestionBody view={view} />}
         </div>
-        {view.shown && !betting && (
+        {view.shown && (
           <div className="flex shrink-0 flex-col items-center gap-4">
             <TimerRing timer={view.timer} />
           </div>
         )}
       </div>
-
-      {/* Fināla atbilžu kartes */}
-      {isFinal && !golden && f && f.stage === 'question' && (
-        <div className="mb-6 grid grid-cols-2 gap-10">
-          {([0, 1] as Side[]).map((side) => (
-            <FinalAnswerCard key={side} view={view} side={side} team={teams[side]} />
-          ))}
-        </div>
-      )}
 
       {/* Komandas */}
       <div className="grid grid-cols-2 gap-10">
@@ -75,14 +57,8 @@ export function QuestionScreen({ view }: { view: PublicView }) {
             matchPoints={m.points[side]}
             active={view.activeSide === side && view.shown && !view.revealed}
             event={view.event}
-            showMatchPoints={!isFinal}
-            extra={
-              isFinal && f?.betsRevealed && !golden ? (
-                <span className="rounded-full bg-hot px-3 py-0.5 text-xl font-black text-white">likme: {f.bets[side]}</span>
-              ) : golden && view.goldenTries[side] ? (
-                <span className="text-xl text-white/50">atbildēja</span>
-              ) : null
-            }
+            showMatchPoints={m.kind !== 'final'}
+            extra={golden && view.goldenTries[side] ? <span className="text-xl text-white/50">atbildēja</span> : null}
           />
         ))}
       </div>
@@ -107,15 +83,11 @@ function Teaser({ view, m }: { view: PublicView; m: PublicMatch }) {
           <div className="gold-text text-[160px] leading-none font-black">{q.number}. jautājums</div>
           <div className="flex gap-6 text-5xl font-extrabold">
             {q.topic && <span className="glass rounded-3xl px-8 py-4">{q.topic}</span>}
-            {m.kind !== 'final' && (
-              <span className="rounded-3xl bg-hot px-8 py-4">
-                {q.points} {pointsWord(q.points)}
-              </span>
-            )}
+            <span className="rounded-3xl bg-hot px-8 py-4">
+              {q.points} {pointsWord(q.points)}
+            </span>
           </div>
-          {m.answerMode === 'buzzer' && m.kind !== 'final' && (
-            <div className="text-3xl font-bold text-white/60">Atbild komanda, kura pirmā nospiež pogu!</div>
-          )}
+          {m.answerMode === 'buzzer' && <div className="text-3xl font-bold text-white/60">Atbild komanda, kura pirmā nospiež pogu!</div>}
         </>
       )}
     </div>
@@ -154,72 +126,115 @@ function QuestionBody({ view }: { view: PublicView }) {
   );
 }
 
-function BettingStage({ view, teams }: { view: PublicView; teams: [PublicTeam, PublicTeam] }) {
-  const f = view.final!;
+// ── Fināla debates ──────────────────────────────────────────
+
+const STANCE: Record<'for' | 'against', { label: string; color: string }> = {
+  for: { label: 'PAR', color: '#34d399' },
+  against: { label: 'PRET', color: '#fb7185' },
+};
+
+function DebateScreen({ view, m, teams }: { view: PublicView; m: PublicMatch; teams: [PublicTeam, PublicTeam] }) {
   const q = view.question;
+  const f = view.final!;
+  const stance = (side: Side) => STANCE[side === f.forSide ? 'for' : 'against'];
+
   return (
-    <div className="flex w-full flex-col items-center gap-10">
-      <div className="anim-pop text-center">
-        <div className="text-4xl font-bold tracking-[0.3em] text-white/60 uppercase">Fināls · {q?.number}. jautājums</div>
-        <div className="gold-text text-[130px] leading-none font-black">LIKMES</div>
-        {q?.topic && <div className="mt-4 text-5xl font-extrabold">Tēma: {q.topic}</div>}
+    <div className="absolute inset-0 flex flex-col px-16 pt-10 pb-10">
+      <div className="flex items-center justify-between text-3xl font-extrabold">
+        <div className="flex items-center gap-4">
+          <span className="rounded-2xl bg-white/10 px-5 py-2 text-white/80">{m.title}</span>
+          {q && (
+            <span className="rounded-2xl bg-gold px-5 py-2 text-[#1b1040]">
+              {q.number}. tēma no {q.total}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-4">
+          {q?.topic && <span className="rounded-2xl bg-white/10 px-5 py-2">{q.topic}</span>}
+          <span className="rounded-2xl bg-hot px-5 py-2">DEBATES</span>
+        </div>
       </div>
-      <div className="grid w-full grid-cols-2 gap-16 px-20">
-        {([0, 1] as Side[]).map((side) => (
-          <div
-            key={side}
-            className="glass flex h-[260px] flex-col items-center justify-center rounded-[40px] text-center"
-            style={{ borderColor: teams[side].color }}
-          >
-            <div className="text-4xl font-black" style={{ color: teams[side].color }}>
-              {teams[side].name}
+
+      <div className="relative flex flex-1 items-center gap-10 py-8">
+        <div className="flex h-full flex-1 flex-col items-center justify-center gap-10">
+          {!q ? (
+            <div className="text-5xl font-black text-white/60">Gatavojamies…</div>
+          ) : !view.shown ? (
+            <div key={q.id} className="anim-pop flex flex-col items-center gap-6 text-center">
+              <div className="text-4xl font-bold tracking-[0.3em] text-white/60 uppercase">{m.roundName} · debates</div>
+              <div className="gold-text text-[160px] leading-none font-black">{q.number}. tēma</div>
+              {q.topic && <span className="glass rounded-3xl px-8 py-4 text-5xl font-extrabold">{q.topic}</span>}
             </div>
-            {f.betsRevealed ? (
-              <div key="bet" className="anim-flip text-[130px] leading-none font-black text-glow">
-                {f.bets[side]}
+          ) : (
+            <div key={q.id} className="flex w-full flex-col items-center gap-4">
+              <div className="text-3xl font-bold tracking-[0.3em] text-white/60 uppercase">Tēze</div>
+              <div
+                className={`anim-flip text-center leading-tight font-black text-balance ${(q.text?.length ?? 0) > 70 ? 'text-[64px]' : 'text-[80px]'}`}
+                style={{ textShadow: '0 6px 30px rgba(0,0,0,0.5)' }}
+              >
+                „{q.text}”
               </div>
-            ) : f.betsLocked[side] ? (
-              <div className="anim-pop mt-4 text-5xl font-black text-emerald-300">✔ Likme likta</div>
-            ) : (
-              <div className="mt-4 animate-pulse text-5xl font-bold text-white/50">Liek likmi…</div>
-            )}
+            </div>
+          )}
+          {q && (
+            <div className="grid w-full grid-cols-2 gap-16 px-10">
+              {([0, 1] as Side[]).map((side) => (
+                <StanceCard key={side} team={teams[side]} stance={stance(side)} jury={f.jury[side]} max={f.maxPoints} />
+              ))}
+            </div>
+          )}
+        </div>
+        {view.shown && (
+          <div className="flex shrink-0 flex-col items-center gap-3">
+            <TimerRing timer={view.timer} />
+            <span className="text-2xl font-bold tracking-widest text-white/50 uppercase">Debašu laiks</span>
           </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-10">
+        {([0, 1] as Side[]).map((side) => (
+          <TeamPanel
+            key={side}
+            team={teams[side]}
+            side={side}
+            matchPoints={m.points[side]}
+            active={false}
+            event={view.event}
+            showMatchPoints={false}
+            extra={
+              <span className="rounded-full px-3 py-0.5 text-xl font-black text-black" style={{ background: stance(side).color }}>
+                {stance(side).label}
+              </span>
+            }
+          />
         ))}
       </div>
     </div>
   );
 }
 
-function FinalAnswerCard({ view, side, team }: { view: PublicView; side: Side; team: PublicTeam }) {
-  const f = view.final!;
-  const revealed = f.revealed[side];
-  const verdict = f.verdict[side];
-  const bet = f.bets[side] ?? 0;
+function StanceCard({ team, stance, jury, max }: { team: PublicTeam; stance: { label: string; color: string }; jury: number | null; max: number }) {
   return (
-    <div className="h-[150px]" style={{ perspective: 1400 }}>
-      {revealed ? (
-        <div
-          key="open"
-          className={`anim-flip flex h-full items-center justify-between rounded-[32px] border-4 px-10 ${verdict ? 'border-emerald-300 bg-emerald-600/85' : 'border-rose-300 bg-rose-600/85'}`}
-        >
-          <div className="min-w-0">
-            <div className="text-2xl font-bold text-white/80">{team.name} atbild:</div>
-            <div className="truncate text-[56px] leading-tight font-black">{f.answers[side] || '—'}</div>
-          </div>
-          <div className="text-right">
-            <div className="text-6xl">{verdict ? '✔' : '✘'}</div>
-            <div className="text-4xl font-black">
-              {verdict ? '+' : '−'}
-              {bet}
-            </div>
-          </div>
+    <div
+      className="glass flex h-[200px] items-center justify-between rounded-[40px] border-4 px-12"
+      style={{ borderColor: stance.color, boxShadow: `0 0 60px ${stance.color}44` }}
+    >
+      <div className="min-w-0">
+        <div className="text-6xl font-black" style={{ color: stance.color }}>
+          {stance.label}
         </div>
-      ) : (
-        <div
-          className="glass flex h-full items-center justify-center gap-6 rounded-[32px] text-5xl font-black text-white/40"
-          style={{ borderColor: team.color }}
-        >
-          <span className="anim-drum inline-block">✉</span> {team.name} atbilde
+        <div className="truncate text-4xl font-black" style={{ color: team.color }}>
+          {team.name}
+        </div>
+      </div>
+      {jury !== null && (
+        <div key="jury" className="anim-flip text-right">
+          <div className="text-xl font-bold tracking-widest text-white/60 uppercase">Žūrija</div>
+          <div className="text-[110px] leading-none font-black text-glow">
+            +{jury}
+            <span className="text-4xl text-white/50">/{max}</span>
+          </div>
         </div>
       )}
     </div>

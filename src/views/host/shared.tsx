@@ -2,7 +2,7 @@ import type { AppState, Match, Question, Side, Team } from '../../types';
 import { act, revealAnswer, showQuestion, timerReset, timerToggle } from '../../lib/engine';
 import { teamById } from '../../lib/tournament';
 import { QUESTION_TYPES } from '../../questionTypes';
-import { OPTION_LETTERS, pointsWord } from '../../lib/util';
+import { formatClock, OPTION_LETTERS, pointsWord } from '../../lib/util';
 import { useRemaining } from '../../components/common';
 
 export function matchTeams(s: AppState, m: Match): [Team, Team] | null {
@@ -70,9 +70,9 @@ export function TimerControl({ s }: { s: AppState }) {
   return (
     <div className="flex items-center gap-2">
       <div
-        className={`w-20 rounded-lg px-2 py-2 text-center text-2xl font-black tabular-nums ${remaining <= 0 ? 'bg-rose-600' : secs <= 5 ? 'bg-rose-600/60' : 'bg-white/10'}`}
+        className={`min-w-20 rounded-lg px-2 py-2 text-center text-2xl font-black tabular-nums ${remaining <= 0 ? 'bg-rose-600' : secs <= 5 ? 'bg-rose-600/60' : 'bg-white/10'}`}
       >
-        {secs}s
+        {secs < 60 ? `${secs}s` : formatClock(secs)}
       </div>
       <button className={`btn ${running ? 'btn-warn' : 'btn-good'}`} onClick={() => act(timerToggle)} title="Atstarpe">
         {running ? '⏸ Apturēt' : '▶ Sākt'} <kbd>Space</kbd>

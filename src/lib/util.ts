@@ -51,6 +51,12 @@ export function pointsWord(n: number): string {
   return abs % 10 === 1 && abs % 100 !== 11 ? 'punkts' : 'punkti';
 }
 
+/** Sekundes taimerim: līdz minūtei — "45", no minūtes — "19:05". */
+export function formatClock(secs: number): string {
+  if (secs < 60) return String(secs);
+  return `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+}
+
 export function readFileAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const r = new FileReader();
