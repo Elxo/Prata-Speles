@@ -18,7 +18,8 @@ import type {
   Side,
   TimerState,
 } from '../types';
-import { rulesDeck } from './engine';
+import { hasPowerUp, powerUpPrice, powerUpsBought, rulesDeck } from './engine';
+import { POWER_UP_LIST } from './powerUps';
 import {
   currentMatch,
   currentQuestion,
@@ -86,6 +87,16 @@ export interface PublicFinal {
   maxPoints: number;
 }
 
+/** Papildiespēja komandas „veikalā” lielajā ekrānā. */
+export interface PublicPowerUp {
+  kind: PowerUpKind;
+  price: number;
+  /** Nopirkta pašreizējam jautājumam. */
+  used: boolean;
+  /** Komanda to vispār var atļauties (punkti un spēles limits). */
+  available: boolean;
+}
+
 export interface PublicView {
   name: string;
   subtitle: string;
@@ -106,8 +117,8 @@ export interface PublicView {
   champion: PublicTeam | null;
   event: LiveEvent | null;
   media: { cmd: MediaCmd; n: number };
-  /** Pašreizējam jautājumam nopirktās papildiespējas (katrai komandai). */
-  powerUps: Pair<PowerUpKind[]>;
+  /** Papildiespējas katrai komandai (tukšs ārpus dueļa jautājumiem). */
+  powerUps: Pair<PublicPowerUp[]>;
   sound: boolean;
 }
 
@@ -207,9 +218,17 @@ export function toPublicView(s: AppState): PublicView {
     champion: pubTeam(t.championId),
     event: live.event,
     media: live.media,
-    powerUps: ([0, 1] as Side[]).map((side) =>
-      m && q && !live.golden.active ? (m.powerUps ?? []).filter((u) => u.side === side && u.questionId === q.id).map((u) => u.kind) : [],
-    ) as Pair<PowerUpKind[]>,
+    powerUps: ([0, 1] as Side[]).map((side): PublicPowerUp[] => {
+      if (!m || !q || m.kind !== 'duel' || m.status !== 'live' || live.golden.active) return [];
+      const limit = t.settings.powerUpsPerGame;
+      const underLimit = !(limit > 0 && powerUpsBought(s, side) >= limit);
+      const score = teamById(t, m.teams[side])?.score ?? 0;
+      return POWER_UP_LIST.filter(([kind]) => t.settings.powerUps?.[kind]?.enabled).map(([kind]) => {
+        const price = powerUpPrice(s, side, kind);
+        const used = hasPowerUp(m, side, q.id, kind);
+        return { kind, price, used, available: used || (underLimit && score >= price) };
+      });
+    }) as Pair<PublicPowerUp[]>,
     sound: live.sound,
   };
 }

@@ -1,13 +1,19 @@
 import type { FinalLive, Live, RuleSlide, Settings, Side } from '../types';
 import { uid } from './util';
 
+/** Palieliniet, kad mainās iebūvētās jautājumu bankas (src/data). */
+export const BANK_VERSION = 2;
+
 export const DEFAULT_SETTINGS: Settings = {
   defaultTimerSec: 30,
   questionsPerGame: 16,
   finalQuestionCount: 3,
   finalTimerSec: 20 * 60,
   imageRevealSteps: 4,
-  debateMaxPoints: 300,
+  debateMaxPoints: 200,
+  pointsRound1: 100,
+  pointsRound2: 150,
+  bankVersion: BANK_VERSION,
   startingScore: 100,
   powerUps: {
     audience: { enabled: true, price: 100 },
@@ -71,7 +77,7 @@ export function defaultRules(): RuleSlide[] {
     ),
     r(
       'Kā tiek piešķirti punkti',
-      'Katra komanda sāk ar 100 punktiem.\nPar katru pareizu atbildi komanda saņem 100 punktus, par nepareizu — 0.\nDueli uzvar komanda, kas šajā spēlē ieguvusi vairāk punktu.',
+      'Katra komanda sāk ar 100 punktiem.\nPar pareizu atbildi pirmajā kārtā — 100 punkti, pusfinālos — 150 punkti, par nepareizu — 0.\nDueli uzvar komanda, kas šajā spēlē ieguvusi vairāk punktu.',
     ),
     r(
       'Laiks',
@@ -96,7 +102,7 @@ export function defaultRules(): RuleSlide[] {
     ),
     r(
       'Fināls: vērtēšana',
-      'Pēc katras tēmas žūrija piešķir katrai komandai līdz 300 punktiem.\nVērtē argumentus, pārliecināšanas spēju un atbildes pretiniekiem.\nŽūrijas punkti tiek pieskaitīti kopējiem punktiem — uzvar komanda ar visvairāk kopējo punktu.',
+      'Pēc katras tēmas žūrija piešķir katrai komandai līdz 200 punktiem.\nVērtē argumentus, pārliecināšanas spēju un atbildes pretiniekiem.\nŽūrijas punkti tiek pieskaitīti kopējiem punktiem — uzvar komanda ar visvairāk kopējo punktu.',
       { final: true },
     ),
   ];

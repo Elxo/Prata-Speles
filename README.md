@@ -6,6 +6,7 @@ Interaktīva TV šova stila aplikācija erudīcijas turnīram. Komandas sacenša
 - **/screen** — lielais ekrāns (projektors/TV): tikai tas, ko drīkst redzēt zāle.
 - **/editor** — redaktors: turnīrs, spēles, komandas, jautājumi, noteikumi, imports un eksports.
 - **/final-preview** — fināla priekšskats: visi fināla ekrāni soli pa solim ar demo datiem (nekas netiek saglabāts).
+- **/noteikumi** — informatīvā lapa ar spēles noteikumiem, punktiem un papildiespēju cenām (skaitļi ņemti no turnīra iestatījumiem; der arī telefonā).
 
 Serveris nav vajadzīgs. Dati glabājas pārlūkā (`localStorage`), un logi sinhronizējas reāllaikā ar `BroadcastChannel`.
 
@@ -79,7 +80,7 @@ Pultī labajā pusē vienmēr redzams lielā ekrāna **priekšskatījums**.
 
 ### Papildiespējas (dueļos)
 
-Katra komanda sāk turnīru ar **100 punktiem** (jautājums parasti dod 100 punktus). Dueļa laikā komanda var nopirkt papildiespējas par saviem **kopējiem** punktiem. Pults komandas kartītē ir pogas ar cenām. Dueļa punkti nemainās, tāpēc pirkums ietekmē kopvērtējumu un finālu, nevis šī dueļa uzvarētāju.
+Katra komanda sāk turnīru ar **100 punktiem**. Jautājums pirmajā kārtā ir **100** punktu vērts, pusfinālos — **150**, žūrija finālā par katru tēmu piešķir līdz **200** punktiem (visu maina redaktorā). Dueļa laikā komanda var nopirkt papildiespējas par saviem **kopējiem** punktiem. Pults komandas kartītē ir pogas ar cenām. Dueļa punkti nemainās, tāpēc pirkums ietekmē kopvērtējumu un finālu, nevis šī dueļa uzvarētāju.
 
 | Papildiespēja | Kad | Ko dara |
 | --- | --- | --- |
@@ -88,7 +89,7 @@ Katra komanda sāk turnīru ar **100 punktiem** (jautājums parasti dod 100 punk
 | ⏱ Papildu laiks | kamēr jautājums ekrānā | Pieliek taimerim sekundes (noklusējums 15 s). |
 | ↪ Nodot pretiniekam | kamēr jautājums ekrānā, tikai atbildētāja komanda | Atbild otra komanda, taimeris sākas no jauna. |
 
-Katru papildiespēju vienam jautājumam komanda var izmantot vienu reizi. Vienā spēlē komanda var nopirkt **ne vairāk kā 3** papildiespējas. Komanda, kas pret savu pretinieku **vada pēc kopējiem punktiem, maksā divreiz vairāk**. Ekrānā parādās paziņojums. Kļūdainu pirkumu var atsaukt ar `Z`. Cenas, sākuma punktus un ieslēgšanu maina redaktorā (**Turnīrs un spēles**).
+Lielajā ekrānā pie komandas nosaukuma redzamas visas papildiespējas ar cenām: nopirktās ir izceltas, tās, ko komanda nevar atļauties, — blāvas. Katru papildiespēju vienam jautājumam komanda var izmantot vienu reizi. Vienā spēlē komanda var nopirkt **ne vairāk kā 3** papildiespējas. Komanda, kas pret savu pretinieku **vada pēc kopējiem punktiem, maksā divreiz vairāk**. Ekrānā parādās paziņojums. Kļūdainu pirkumu var atsaukt ar `Z`. Cenas, sākuma punktus un ieslēgšanu maina redaktorā (**Turnīrs un spēles**).
 
 ### Kas iet tālāk (6 komandu shēma, 6 spēles)
 

@@ -45,9 +45,14 @@ export default function Home() {
           </a>
         ))}
       </div>
-      <a href={routeHref('final-preview')} className="relative mt-6 text-sm font-semibold text-amber-300 hover:underline">
-        🏆 Apskatīt, kā izskatās fināls →
-      </a>
+      <div className="relative mt-6 flex flex-wrap justify-center gap-x-8 gap-y-2">
+        <a href={routeHref('noteikumi')} className="text-sm font-semibold text-amber-300 hover:underline">
+          📜 Spēles noteikumi →
+        </a>
+        <a href={routeHref('final-preview')} className="text-sm font-semibold text-amber-300 hover:underline">
+          🏆 Apskatīt, kā izskatās fināls →
+        </a>
+      </div>
       <p className="relative mt-6 max-w-2xl text-center text-sm text-white/50">
         Atveriet pulti un lielo ekrānu divos atsevišķos logos tajā pašā pārlūkā — tie sinhronizējas automātiski.
         Visi dati glabājas šajā pārlūkā (localStorage).

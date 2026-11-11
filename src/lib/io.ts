@@ -3,9 +3,10 @@
 // ─────────────────────────────────────────────────────────────
 import { produce } from 'immer';
 import type { AppState, Question, QuestionType, Tournament } from '../types';
-import { createFinalLive, createLive, DEFAULT_QUESTION_POINTS, DEFAULT_SETTINGS } from './defaults';
+import { BANK_VERSION, createFinalLive, createLive, DEFAULT_QUESTION_POINTS, DEFAULT_SETTINGS } from './defaults';
 import { normalize, uid } from './util';
 import { questionBanks } from '../data/demo';
+import { applyRoundPoints } from './draw';
 
 const FORMAT = 'prata-speles';
 
@@ -80,6 +81,26 @@ export function migrateState(s: AppState): AppState {
     // Vecākiem turnīriem nav jautājumu/tēžu bankas — bez tās nevar izlozēt jautājumus.
     const sets = d.tournament.questionSets;
     for (const bank of questionBanks()) if (!sets.some((x) => x.bank === bank.bank)) sets.push(bank);
+    // Iebūvētās bankas mainījušās (piem., labots jautājumu formulējums) — aizstāj ar jaunāko versiju.
+    if ((st.bankVersion ?? 1) < BANK_VERSION) {
+      for (const fresh of questionBanks()) {
+        const old = sets.find((x) => x.bank === fresh.bank);
+        if (old) old.questions = fresh.questions;
+      }
+      st.bankVersion = BANK_VERSION;
+    }
+    // Punkti pa kārtām: 1. kārta 100, pusfināli 150, debates līdz 200.
+    if (st.pointsRound1 == null || st.pointsRound2 == null) {
+      st.pointsRound1 = DEFAULT_SETTINGS.pointsRound1;
+      st.pointsRound2 = DEFAULT_SETTINGS.pointsRound2;
+      if (st.debateMaxPoints === 300) st.debateMaxPoints = DEFAULT_SETTINGS.debateMaxPoints;
+      for (const r of d.tournament.rules) {
+        r.body = r.body
+          .replace('Par katru pareizu atbildi komanda saņem 100 punktus, par nepareizu', 'Par pareizu atbildi pirmajā kārtā — 100 punkti, pusfinālos — 150 punkti, par nepareizu')
+          .replace('līdz 300 punktiem', 'līdz 200 punktiem');
+      }
+      applyRoundPoints(d.tournament);
+    }
     if (!('forSide' in d.live.final)) d.live.final = createFinalLive();
   });
 }

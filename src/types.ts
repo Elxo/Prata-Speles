@@ -163,6 +163,12 @@ export interface Settings {
   imageRevealSteps: number;
   /** Maksimālie žūrijas punkti vienai komandai par vienu tēmu. */
   debateMaxPoints: number;
+  /** Punkti par jautājumu pirmās kārtas dueļos. */
+  pointsRound1: number;
+  /** Punkti par jautājumu otrās kārtas (pusfinālu) un turpmākajos dueļos. */
+  pointsRound2: number;
+  /** Iebūvēto jautājumu banku versija (lai atjauninātu saglabātos turnīrus). */
+  bankVersion?: number;
   /** Ar cik punktiem katra komanda sāk turnīru. */
   startingScore: number;
   /** Papildiespēju cenas un ieslēgšana. */

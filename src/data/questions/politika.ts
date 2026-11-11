@@ -113,7 +113,7 @@ export const POLITIKA: [string, string][] = [
   ['Cik bieži notiek pašvaldību vēlēšanas Latvijā?', 'Reizi četros gados'],
   ['Kāds ir minimālais vecums, lai kandidētu pašvaldību vēlēšanās?', '18 gadi'],
   ['Cik deputātu kopā ir Eiropas Parlamentā – ap 350, ap 720 vai ap 1000?', 'Ap 720'],
-  ['Kā sauc Eiropas Savienības dalībvalstu valstu un valdību vadītāju sanāksmi?', 'Eiropadome'],
+  ['Kā sauc ES institūciju, kurā tiekas dalībvalstu valstu vai valdību vadītāji?', 'Eiropadome'],
   ['Kura bija pirmā sieviete – Lielbritānijas premjerministre?', 'Mārgareta Tečere'],
   ['Kurš bija ASV prezidents, kad 1991. gadā sabruka PSRS?', 'Džordžs H. V. Bušs'],
   ['Kurš bija pēdējais PSRS vadītājs?', 'Mihails Gorbačovs'],

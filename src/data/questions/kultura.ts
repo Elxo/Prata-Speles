@@ -90,7 +90,7 @@ export const KULTURA: [string, string][] = [
   ['Kā sauc latviešu tautas tērpa sieviešu plecu segu?', 'Villaine'],
   ['Kā sauc apaļu metāla rotu, ar ko saspraudž kreklu vai villaini?', 'Sakta'],
   ['Kurš horeogrāfs radīja “Gatves deju”?', 'Uldis Žagata'],
-  ['Kurā gadā, pēc ziņām, tika izdota pirmā grāmata latviešu valodā?', '1525. gadā'],
+  ['Kurā gadā iznāca pirmā zināmā grāmata latviešu valodā?', '1525. gadā'],
   ['Kurš tulkoja Bībeli latviešu valodā (izdota 1694. gadā)?', 'Ernsts Gliks'],
   ['Kurā pilsētā atrodas Ernsta Glika Bībeles muzejs?', 'Alūksnē'],
   ['Kura rakstniece ir “Harija Potera” grāmatu autore?', 'Dž. K. Roulinga'],

@@ -4,8 +4,9 @@ import ScreenApp from './views/screen/ScreenApp';
 import EditorApp from './views/editor/EditorApp';
 import Home from './views/Home';
 import FinalPreview from './views/preview/FinalPreview';
+import RulesPage from './views/RulesPage';
 
-export type Route = 'home' | 'host' | 'screen' | 'editor' | 'final-preview';
+export type Route = 'home' | 'host' | 'screen' | 'editor' | 'final-preview' | 'rules';
 
 /** Atbalsta gan /host, gan #/host (statiskam hostingam bez SPA pāradresācijas). */
 function getRoute(): Route {
@@ -14,6 +15,7 @@ function getRoute(): Route {
   if (path.endsWith('/screen')) return 'screen';
   if (path.endsWith('/editor')) return 'editor';
   if (path.endsWith('/final-preview')) return 'final-preview';
+  if (path.endsWith('/noteikumi')) return 'rules';
   return 'home';
 }
 
@@ -37,6 +39,7 @@ export default function App() {
       screen: 'Lielais ekrāns — Prāta spēles',
       editor: 'Redaktors — Prāta spēles',
       'final-preview': 'Fināla priekšskats — Prāta spēles',
+      rules: 'Noteikumi — Prāta spēles',
     };
     document.title = titles[route];
   }, [route]);
@@ -50,6 +53,8 @@ export default function App() {
       return <EditorApp />;
     case 'final-preview':
       return <FinalPreview />;
+    case 'rules':
+      return <RulesPage />;
     default:
       return <Home />;
   }

@@ -65,7 +65,7 @@ export function QuestionScreen({ view }: { view: PublicView }) {
               golden ? (
                 view.goldenTries[side] ? <span className="text-xl text-white/50">atbildēja</span> : null
               ) : (
-                <PowerUpBadges kinds={view.powerUps[side]} />
+                <PowerUpChips items={view.powerUps[side]} />
               )
             }
           />
@@ -77,17 +77,28 @@ export function QuestionScreen({ view }: { view: PublicView }) {
   );
 }
 
-function PowerUpBadges({ kinds }: { kinds: PublicView['powerUps'][number] }) {
-  if (!kinds.length) return null;
+/** Komandas papildiespējas pie nosaukuma: nopirktās izceltas, nepieejamās — blāvas. */
+function PowerUpChips({ items }: { items: PublicView['powerUps'][number] }) {
+  if (!items.length) return null;
   return (
-    <>
-      {kinds.map((k) => (
-        <span key={k} className="anim-pop rounded-full bg-fuchsia-500 px-3 py-0.5 text-xl font-black text-white" title={POWER_UPS[k].label}>
-          {POWER_UPS[k].icon}
-          {k === 'double' ? ' PUNKTI' : ''}
+    <span className="flex items-center gap-1.5">
+      {items.map((p) => (
+        <span
+          key={p.kind}
+          title={POWER_UPS[p.kind].label}
+          className={`flex items-center gap-1 rounded-full border-2 px-2.5 py-0.5 text-lg leading-tight font-black transition-all duration-500 ${
+            p.used
+              ? 'anim-pop border-fuchsia-200 bg-fuchsia-500 text-white shadow-[0_0_24px_rgba(217,70,239,0.8)]'
+              : p.available
+                ? 'border-white/40 bg-black/30 text-white'
+                : 'border-white/10 bg-black/20 text-white/30 line-through'
+          }`}
+        >
+          <span>{POWER_UPS[p.kind].icon}</span>
+          <span className="tabular-nums">{p.used ? '✔' : p.price}</span>
         </span>
       ))}
-    </>
+    </span>
   );
 }
 

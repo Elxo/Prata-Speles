@@ -7,6 +7,7 @@ import { resetProgress } from '../../lib/engine';
 import { slotLabel } from '../../lib/tournament';
 import { readFileAsDataURL, uid } from '../../lib/util';
 import { DrawQuestionsButton } from '../../components/DrawQuestionsButton';
+import { applyRoundPoints } from '../../lib/draw';
 
 const SLOT_KINDS: { kind: Slot['kind']; label: string }[] = [
   { kind: 'seed', label: 'Izloze / manuāli' },
@@ -107,6 +108,16 @@ export function TournamentTab({ s }: { s: AppState }) {
         />
         <NumberField label="Žūrijas maks. punkti par tēmu" value={t.settings.debateMaxPoints} onChange={(v) => setSetting('debateMaxPoints', v)} />
         <NumberField label="Sākuma punkti komandai" value={t.settings.startingScore} onChange={(v) => setSetting('startingScore', v)} />
+        <NumberField
+          label="Punkti par jautājumu: 1. kārta"
+          value={t.settings.pointsRound1}
+          onChange={(v) => commit((d) => ((d.tournament.settings.pointsRound1 = v), applyRoundPoints(d.tournament)))}
+        />
+        <NumberField
+          label="Punkti par jautājumu: pusfināli (2. kārta)"
+          value={t.settings.pointsRound2}
+          onChange={(v) => commit((d) => ((d.tournament.settings.pointsRound2 = v), applyRoundPoints(d.tournament)))}
+        />
         <div className="col-span-full space-y-2 rounded-lg bg-black/20 p-3">
           <div className="flex flex-wrap items-baseline gap-2">
             <h3 className="font-bold">Papildiespējas (dueļos)</h3>

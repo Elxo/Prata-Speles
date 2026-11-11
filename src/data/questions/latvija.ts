@@ -88,7 +88,7 @@ export const LATVIJA: [string, string][] = [
   ['Kurā datumā Latvijā piemin 1941. gada deportāciju upurus?', '14. jūnijā'],
   ['Kurā datumā atzīmē 1949. gada deportāciju upuru piemiņas dienu?', '25. martā'],
   ['Kurā datumā Latvijā atzīmē Satversmes sapulces sasaukšanas dienu?', '1. maijā'],
-  ['Kā sauc Latvijas teritoriju senajā laikā, ko vācu krustneši sauca kopīgi ar Igauniju?', 'Livonija (Līvzeme)'],
+  ['Kā viduslaikos sauca mūsdienu Latvijas un Igaunijas teritoriju?', 'Livonija (Līvzeme)'],
   ['Kā sauc Kurzemes hercogu, kura laikā hercogistei bija kolonijas Gambijā un Tobāgo?', 'Hercogs Jēkabs'],
   ['Kurā gadā Kurzemē tika atcelta dzimtbūšana?', '1817. gadā'],
   ['Kā tautā sauca pirmās brīvvalsts 5 latu sudraba monētu ar sievietes portretu?', '“Milda”'],

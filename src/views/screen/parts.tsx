@@ -139,7 +139,7 @@ export function TeamPanel({
       <TeamBadge name={team.name} color={team.color} logo={team.logo} size={110} />
       <div className={`flex min-w-0 flex-1 flex-col ${side === 1 ? 'items-end text-right' : ''}`}>
         <div className="truncate text-[44px] leading-tight font-black">{team.name}</div>
-        <div className="flex items-center gap-3 text-2xl font-bold text-white/70">
+        <div className={`flex flex-wrap items-center gap-x-3 gap-y-1 text-2xl font-bold text-white/70 ${side === 1 ? 'justify-end' : ''}`}>
           {showMatchPoints && <span>šajā spēlē: {matchPoints}</span>}
           {active && <span className="rounded-full bg-gold px-3 py-0.5 text-xl font-black text-black">ATBILD</span>}
           {extra}

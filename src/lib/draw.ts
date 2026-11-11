@@ -46,6 +46,23 @@ function ownSet(t: Tournament, m: Match): QuestionSet {
 
 const copy = (q: Question): Question => ({ ...q, id: uid('q') });
 
+/** Punkti par jautājumu dueļā atkarībā no kārtas. */
+export function duelPoints(t: Tournament, m: Match): number {
+  const st = t.settings;
+  return m.round <= 1 ? st.pointsRound1 : st.pointsRound2;
+}
+
+/** Iestata kārtas punktus visu vēl nesākto dueļu (pašu) jautājumiem. */
+export function applyRoundPoints(t: Tournament) {
+  for (const m of t.matches) {
+    if (m.kind !== 'duel' || m.status !== 'pending') continue;
+    const set = t.questionSets.find((x) => x.id === m.questionSetId);
+    const shared = t.matches.some((x) => x !== m && x.questionSetId === m.questionSetId) || set?.id === t.goldenSetId;
+    if (!set || set.bank || shared) continue;
+    for (const q of set.questions) q.points = duelPoints(t, m);
+  }
+}
+
 export function drawQuestions(t: Tournament): DrawResult {
   const warnings: string[] = [];
   const setOf = (m: Match) => t.questionSets.find((x) => x.id === m.questionSetId);
@@ -77,7 +94,7 @@ export function drawQuestions(t: Tournament): DrawResult {
     }
     duels.forEach((m, k) => {
       const set = ownSet(t, m);
-      set.questions = hands[k].map(copy);
+      set.questions = hands[k].map((q) => ({ ...copy(q), points: duelPoints(t, m) }));
       m.questionCount = 0;
       filled++;
     });
