@@ -53,6 +53,7 @@ export interface PublicMatch {
   answerMode: AnswerMode;
   teams: Pair<PublicTeam | null>;
   labels: Pair<string>;
+  /** Komandu kopējie punkti (beigušās spēles — spēles beigās). */
   points: Pair<number>;
   winnerSide: Side | null;
   decidedBy?: 'points' | 'golden' | 'manual';
@@ -153,7 +154,10 @@ export function toPublicView(s: AppState): PublicView {
       answerMode: m.answerMode,
       teams: [pubTeam(m.teams[0]), pubTeam(m.teams[1])],
       labels: [slotLabel(t, m.slots[0]), slotLabel(t, m.slots[1])],
-      points: m.points,
+      // Kopējie punkti: beigušās spēles — spēles beigās, pārējām — pašreizējie.
+      points: m.result
+        ? [m.result.totalsAfter[m.teams[0]!] ?? 0, m.result.totalsAfter[m.teams[1]!] ?? 0]
+        : [teamById(t, m.teams[0])?.score ?? 0, teamById(t, m.teams[1])?.score ?? 0],
       winnerSide: m.result ? sideOf(m, m.result.winner) : null,
       decidedBy: m.result?.decidedBy,
       questionCount: matchQuestions(t, m).length,

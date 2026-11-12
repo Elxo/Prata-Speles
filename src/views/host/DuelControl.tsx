@@ -121,12 +121,8 @@ export function DuelControl({ s, m }: { s: AppState; m: Match }) {
               </div>
               <div className="flex items-end gap-4">
                 <div>
-                  <div className="label">Šajā spēlē</div>
-                  <div className="text-3xl font-black">{m.points[side]}</div>
-                </div>
-                <div>
-                  <div className="label">Kopā</div>
-                  <div className="text-3xl font-black text-white/70">{team.score}</div>
+                  <div className="label">Punkti</div>
+                  <div className="text-3xl font-black">{team.score}</div>
                 </div>
                 <div className="ml-auto flex gap-1">
                   <button className="btn btn-sm" onClick={() => act((d) => adjustScore(d, team.id, -SCORE_STEP), `−${SCORE_STEP} ${team.name}`)}>
@@ -177,7 +173,7 @@ export function DuelControl({ s, m }: { s: AppState; m: Match }) {
 
       <div className="flex items-center justify-end gap-3">
         <span className="text-sm text-white/50">
-          Uzvar komanda ar vairāk punktu šajā spēlē. Neizšķirta gadījumā — zelta jautājums.
+          Uzvar komanda ar vairāk kopējo punktu. Neizšķirta gadījumā — zelta jautājums.
         </span>
         <button className="btn btn-bad btn-lg" onClick={finish}>
           🏁 Beigt spēli
@@ -199,7 +195,7 @@ function PowerUpRow({ s, side, teamName }: { s: AppState; side: Side; teamName: 
   return (
     <div className="space-y-1 border-t border-white/10 pt-2">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="label">Papildiespējas (no kopējiem punktiem)</span>
+        <span className="label">Papildiespējas (maksā punktus)</span>
         <span className="text-xs text-white/50">
           {powerUpsBought(s, side)}
           {limit > 0 ? `/${limit}` : ''} šajā spēlē

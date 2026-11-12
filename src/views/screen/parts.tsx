@@ -83,19 +83,15 @@ export function useTimerSounds(timer: TimerState, enabled: boolean) {
 export function TeamPanel({
   team,
   side,
-  matchPoints,
   active,
   event,
   extra,
-  showMatchPoints = true,
 }: {
   team: PublicTeam;
   side: Side;
-  matchPoints: number;
   active: boolean;
   event: LiveEvent | null;
   extra?: React.ReactNode;
-  showMatchPoints?: boolean;
 }) {
   const [floats, setFloats] = useState<{ n: number; delta: number }[]>([]);
   const [flash, setFlash] = useState<'good' | 'bad' | null>(null);
@@ -140,7 +136,6 @@ export function TeamPanel({
       <div className={`flex min-w-0 flex-1 flex-col ${side === 1 ? 'items-end text-right' : ''}`}>
         <div className="truncate text-[44px] leading-tight font-black">{team.name}</div>
         <div className={`flex flex-wrap items-center gap-x-3 gap-y-1 text-2xl font-bold text-white/70 ${side === 1 ? 'justify-end' : ''}`}>
-          {showMatchPoints && <span>šajā spēlē: {matchPoints}</span>}
           {active && <span className="rounded-full bg-gold px-3 py-0.5 text-xl font-black text-black">ATBILD</span>}
           {extra}
         </div>

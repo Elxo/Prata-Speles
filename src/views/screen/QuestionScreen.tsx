@@ -57,10 +57,8 @@ export function QuestionScreen({ view }: { view: PublicView }) {
             key={side}
             team={teams[side]}
             side={side}
-            matchPoints={m.points[side]}
             active={view.activeSide === side && view.shown && !view.revealed}
             event={view.event}
-            showMatchPoints={m.kind !== 'final'}
             extra={
               golden ? (
                 view.goldenTries[side] ? <span className="text-xl text-white/50">atbildēja</span> : null
@@ -263,10 +261,8 @@ function DebateScreen({ view, m, teams }: { view: PublicView; m: PublicMatch; te
             key={side}
             team={teams[side]}
             side={side}
-            matchPoints={m.points[side]}
             active={false}
             event={view.event}
-            showMatchPoints={false}
             extra={
               <span className="rounded-full px-3 py-0.5 text-xl font-black text-black" style={{ background: stance(side).color }}>
                 {stance(side).label}

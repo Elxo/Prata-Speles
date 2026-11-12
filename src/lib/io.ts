@@ -73,6 +73,7 @@ export function migrateState(s: AppState): AppState {
           .replace('līdz 30 punktiem', 'līdz 300 punktiem');
       }
     }
+    for (const r of d.tournament.rules) r.body = r.body.replace('Dueli uzvar komanda, kas šajā spēlē ieguvusi vairāk punktu.', 'Dueli uzvar komanda, kurai ir vairāk kopējo punktu.');
     st.powerUps ??= structuredClone(DEFAULT_SETTINGS.powerUps);
     st.extraTimeSec ??= DEFAULT_SETTINGS.extraTimeSec;
     st.leaderPriceMultiplier ??= DEFAULT_SETTINGS.leaderPriceMultiplier;

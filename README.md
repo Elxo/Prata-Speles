@@ -75,12 +75,12 @@ Pultī labajā pusē vienmēr redzams lielā ekrāna **priekšskatījums**.
 - Režīmā **„pēc kārtas”** atbildētājs mainās automātiski. Režīmā **„ar pogu”** vadītājs atzīmē, kura komanda pieteicās pirmā.
 - **Attēla jautājumi:** „🧩 Atklāt vairāk” atklāj attēlu pa daļām.
 - **Audio/video:** pultī ir pogas Atskaņot / Pauze / No sākuma, un atskaņošana notiek lielajā ekrānā.
-- **„🏁 Beigt spēli”** — uzvar komanda ar vairāk punktiem **šajā spēlē**. Ja rezultāts ir neizšķirts, automātiski sākas **zelta jautājums**: atzīmējiet pirmo pareizo atbildi un vēlreiz nospiediet „Beigt spēli”.
+- **„🏁 Beigt spēli”** — uzvar komanda ar vairāk **kopējiem** punktiem (atsevišķu dueļa punktu nav — punkti pāriet no kārtas uz kārtu, ieskaitot sākuma punktus un papildiespēju izdevumus). Ja rezultāts ir neizšķirts, automātiski sākas **zelta jautājums**: atzīmējiet pirmo pareizo atbildi un vēlreiz nospiediet „Beigt spēli”.
 - Punktus var koriģēt ar `−10` / `+10` (komandas kartītē) vai ar jebkuru soli punktu tabulā (cilne „Turnīrs”).
 
 ### Papildiespējas (dueļos)
 
-Katra komanda sāk turnīru ar **100 punktiem**. Jautājums pirmajā kārtā ir **100** punktu vērts, pusfinālos — **150**, žūrija finālā par katru tēmu piešķir līdz **200** punktiem (visu maina redaktorā). Dueļa laikā komanda var nopirkt papildiespējas par saviem **kopējiem** punktiem. Pults komandas kartītē ir pogas ar cenām. Dueļa punkti nemainās, tāpēc pirkums ietekmē kopvērtējumu un finālu, nevis šī dueļa uzvarētāju.
+Katra komanda sāk turnīru ar **100 punktiem**. Jautājums pirmajā kārtā ir **100** punktu vērts, pusfinālos — **150**, žūrija finālā par katru tēmu piešķir līdz **200** punktiem (visu maina redaktorā). Dueļa laikā komanda var nopirkt papildiespējas par saviem **kopējiem** punktiem. Pults komandas kartītē ir pogas ar cenām. Tā kā visas spēles izšķir kopējie punkti, pirkums var ietekmēt arī šī dueļa iznākumu.
 
 | Papildiespēja | Kad | Ko dara |
 | --- | --- | --- |

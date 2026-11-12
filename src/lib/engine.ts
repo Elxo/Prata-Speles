@@ -303,12 +303,9 @@ export function buyPowerUp(s: Draft, side: Side, kind: PowerUpKind) {
 
 // ── Spēles beigas un zelta jautājums ────────────────────────
 
-/** Salīdzināmie punkti: dueļos — šīs spēles punkti, finālā — kopējie punkti. */
+/** Salīdzināmie punkti: vienmēr komandu KOPĒJIE punkti (atsevišķu dueļa punktu nav). */
 export function decidingScores(s: AppState, m: Match): [number, number] {
-  if (m.kind === 'final') {
-    return [teamById(s.tournament, m.teams[0])?.score ?? 0, teamById(s.tournament, m.teams[1])?.score ?? 0];
-  }
-  return [m.points[0], m.points[1]];
+  return [teamById(s.tournament, m.teams[0])?.score ?? 0, teamById(s.tournament, m.teams[1])?.score ?? 0];
 }
 
 export function endMatch(s: Draft) {

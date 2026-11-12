@@ -125,7 +125,7 @@ export function OverviewPanel({ s, onGoLive }: { s: AppState; onGoLive: () => vo
                           <span className={`flex items-center gap-2 rounded-md px-2 py-1 ${won ? 'bg-amber-400/20 font-bold' : ''}`}>
                             <TeamBadge name={team.name} color={team.color} logo={team.logo} size={22} />
                             {team.name}
-                            {m.status !== 'pending' && m.kind !== 'final' && <b className="tabular-nums">{m.points[i]}</b>}
+                            {m.status !== 'pending' && <b className="tabular-nums">{m.result?.totalsAfter[team.id] ?? team.score}</b>}
                             {won && '🏅'}
                           </span>
                         ) : (

@@ -63,9 +63,9 @@ export default function RulesPage() {
               {pointsWord(st.pointsRound2)}.
             </li>
             <li>Atbildei ir {st.defaultTimerSec} sekundes. Pēdējās 5 sekundēs taimeris kļūst sarkans.</li>
-            <li>Dueli uzvar komanda, kas šajā spēlē ieguvusi vairāk punktu.</li>
+            <li>Atsevišķu dueļa punktu nav — visas spēles izšķir komandu kopējie punkti, kas pāriet no kārtas uz kārtu.</li>
+            <li>Dueli uzvar komanda, kurai spēles beigās ir vairāk kopējo punktu.</li>
             <li>Neizšķirta gadījumā tiek uzdots zelta jautājums — uzvar pirmā pareizā atbilde.</li>
-            <li>Kopējie punkti pāriet no kārtas uz kārtu un netiek atiestatīti.</li>
           </ul>
         </Section>
 

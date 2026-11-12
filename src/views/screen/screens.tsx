@@ -143,17 +143,9 @@ export function MatchResultScreen({ view }: { view: PublicView }) {
       <div className="anim-slide delay-5 flex items-center gap-10 text-6xl font-black">
         <span style={{ color: winner.color }}>{m.points[m.winnerSide]}</span>
         <span className="text-white/40">:</span>
-        <span className="text-white/50">{m.points[1 - m.winnerSide]}</span>
+        <span style={{ color: loser.color, opacity: 0.6 }}>{m.points[1 - m.winnerSide]}</span>
       </div>
       {m.decidedBy === 'golden' && <div className="shimmer rounded-full bg-gold px-8 py-2 text-3xl font-black text-black">Izšķīra zelta jautājums!</div>}
-      <div className="anim-fade delay-5 grid grid-cols-2 gap-10 text-3xl font-bold text-white/70">
-        <div>
-          {winner.name}: kopā <b className="text-white">{winner.score}</b> {pointsWord(winner.score)}
-        </div>
-        <div>
-          {loser.name}: kopā <b className="text-white">{loser.score}</b> {pointsWord(loser.score)}
-        </div>
-      </div>
     </div>
   );
 }

@@ -77,7 +77,7 @@ export function defaultRules(): RuleSlide[] {
     ),
     r(
       'Kā tiek piešķirti punkti',
-      'Katra komanda sāk ar 100 punktiem.\nPar pareizu atbildi pirmajā kārtā — 100 punkti, pusfinālos — 150 punkti, par nepareizu — 0.\nDueli uzvar komanda, kas šajā spēlē ieguvusi vairāk punktu.',
+      'Katra komanda sāk ar 100 punktiem.\nPar pareizu atbildi pirmajā kārtā — 100 punkti, pusfinālos — 150 punkti, par nepareizu — 0.\nDueli uzvar komanda, kurai ir vairāk kopējo punktu.',
     ),
     r(
       'Laiks',
